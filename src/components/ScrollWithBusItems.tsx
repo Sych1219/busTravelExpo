@@ -1,6 +1,6 @@
 import {ScrollView} from "react-native";
 import {BusStopWithBusesInfoProps} from "../screens/NearbyScreen";
-import BusItem from "@components/BusItem";
+import NearbyBusItem from "@components/NearbyBusItem";
 
 type ScrollWithBusItemsProps = {
     busStopWithBusesInfo: BusStopWithBusesInfoProps;
@@ -9,7 +9,7 @@ const ScrollWithBusItems = ({busStopWithBusesInfo}: ScrollWithBusItemsProps) => 
     return (
         <ScrollView>
             {busStopWithBusesInfo.services.map((service, serviceIndex) => (
-                (<BusItem
+                (<NearbyBusItem
                     key={serviceIndex}
                     serviceNo={service.serviceNo}
                     operator={service.operator}

@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {SafeAreaView, Text} from "react-native";
-import BusItem, {NextBus} from "../components/BusItem";
+import NearbyBusItem, {NextBus} from "@components/NearbyBusItem";
 import axios, {AxiosRequestConfig} from "axios";
 import {userFavoriteBusStopUrl} from "@utils/UrlsUtil";
+import FavouriteBusItem from "@components/FavouriteBusItem";
 
 
 interface FavouriteBus {
@@ -54,7 +55,7 @@ const FavouriteScreen = () => {
         <SafeAreaView>
             {
                 favouriteBuses.length > 0 ? favouriteBuses.map((item, index) =>
-                    (<BusItem key={index}
+                    (<FavouriteBusItem key={index}
                               serviceNo={item.busCode}
                               operator={"hardcode operator"}
                               nextBus={item.nextBus}

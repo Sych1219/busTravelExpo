@@ -1,6 +1,6 @@
 import React from "react";
 import CustomerTabView from "@components/CustomerTabView";
-import {Service} from "@components/BusItem";
+import {Service} from "@components/NearbyBusItem";
 
 export interface BusStopWithBusesInfoProps {
     busStopRoadName: string;

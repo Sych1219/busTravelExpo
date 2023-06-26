@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {formatCountdown, getBusType, getLoadColor} from "@utils/UtilsMethod";
 import ArrvingInfoCard from "@components/ArrvingInfoCard";
 import axios, {AxiosRequestConfig} from "axios";
-import {busServiceUrl} from "@utils/UrlsUtil";
+import {busServiceUrl, clickOnFavouriteBus} from "@utils/UrlsUtil";
 
 
 export interface Service {
@@ -29,51 +29,62 @@ export interface NextBus {
 
 }
 
-interface BusServiceParams  {
+interface BusServiceParams {
     busStopCode: string,
-    serviceNo: string,
-    deviceId: string,
+    busCode: string,
+
+}
+
+interface NearbyBusItemProps {
+    busStopCode: string;
+    service: Service;
 }
 
 const NearbyBusItem = ({
-                     serviceNo,
-                     operator,
-                     nextBus,
-                     nextBus2,
-                     nextBus3
-                 }: Service) => {
+                           busStopCode, service
+                       }: NearbyBusItemProps) => {
 
+
+    const [serviceInside, setServiceInside] = useState<Service>(service);
+    const {nextBus, nextBus2, nextBus3, serviceNo}: Service = serviceInside;
     const isWheelChairAccessible = nextBus.feature === 'WAB'
-    const [service, setService] = useState<Service>();
-    // const [countdown, setCountdown] = useState(nextBus.countDown);
-    // useEffect(() => {
-    //     const timer = setInterval(() => {
-    //         setCountdown(prevCountdown => prevCountdown - 1);
-    //     }, 1000);
-    //
-    //     // Clean up the timer when the component unmounts
-    //     return () => {
-    //         clearInterval(timer);
-    //     };
-    // }, []); // Empty dependency array ensures that the effect runs only once
 
-
-    const getBusService = (busStopCode: string, busCode: string) => {
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const updateBusService = (busStopCode: string, busCode: string) => {
+        setIsRefreshing(true);
         const params: BusServiceParams = {
             busStopCode: busStopCode,
-            serviceNo: busCode,
-            deviceId: "1",
+            busCode: busCode,
         }
-        const config: AxiosRequestConfig = {
+        const busServiceUrlParameter: AxiosRequestConfig = {
             params: params,
         };
-        try {
-            axios.get<Service>(busServiceUrl, config).then((response) => {
-                setService(response.data);
-            });
-        } catch (error) {
-            throw new Error('Failed to fetch data');
+        const parmas2 = {
+            deviceId: 123,
+            busStopCode,
+            busCode,
+            longitude:103.9004605,
+            latitude:1.4037280,
         }
+
+        //here also need to call the be for faviourite bus
+        axios.get(clickOnFavouriteBus, {params:parmas2}).then((response) => {
+            console.log("click for faviourite", response.data)
+        }).catch((error) => {
+            console.log("click for faviourite got error", error)
+        });
+
+
+        axios.get<Service>(busServiceUrl, busServiceUrlParameter).then((response) => {
+            console.log("updateBusService", response.data)
+            setServiceInside(response.data);
+            setIsRefreshing(false);
+        }).catch((error) => {
+            console.log("updateBusService", error)
+            setIsRefreshing(false);
+            throw new Error('Failed to fetch data');
+        });
+
 
     }
 
@@ -93,8 +104,9 @@ const NearbyBusItem = ({
                             <Image className="w-5 h-5 absolute bottom-0 right-0"
                                    source={require('../assets/wheelchair.jpg')}/>}
                     </View>
-                    <TouchableOpacity>
-                        <ArrvingInfoCard nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3} />
+                    <TouchableOpacity onPress={() => updateBusService(busStopCode, serviceNo)}>
+                        <ArrvingInfoCard nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3}
+                                         isRefreshing={isRefreshing}/>
                     </TouchableOpacity>
 
                 </View>

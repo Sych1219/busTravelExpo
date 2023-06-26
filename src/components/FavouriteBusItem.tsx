@@ -54,7 +54,7 @@ const FavouriteBusItem = ({
                                    source={require('../assets/wheelchair.jpg')}/>}
                     </View>
                     <ArrvingInfoCard
-                        nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3}/>
+                        nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3} isRefreshing={false}/>
 
                 </View>
 

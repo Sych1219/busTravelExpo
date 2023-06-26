@@ -1,6 +1,9 @@
 
 //input is LoadType output is color string
-export const getLoadColor = (load: string): string => {
+export const getLoadColor = (load: string|null): string => {
+    if (load === null) {
+        return 'text-gray-500'; // Return a default color for null values
+    }
     switch (load) {
         case 'SEA':
             return 'text-green-500';
@@ -8,11 +11,16 @@ export const getLoadColor = (load: string): string => {
             return 'text-yellow-500';
         case "LSD":
             return 'text-red-500';
+        default:
+            return 'text-green-500'; // Return a default color for unknown values
     }
-    return 'text-green-500';
 }
 
-export function formatCountdown(countdown: number): string {
+export function formatCountdown(countdown: number|null): string {
+    if (countdown === null) {
+        return 'Arr';
+
+    }
     const minutes = Math.floor(countdown / 60);
     const seconds = countdown % 60;
     if (minutes < 1) {

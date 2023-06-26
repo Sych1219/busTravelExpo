@@ -44,7 +44,6 @@ const FavouriteScreen = () => {
         try {
             axios.get<FavouriteBus[]>(userFavoriteBusStopUrl, config).then((response) => {
                 setFavouriteBuses(response.data);
-                console.log("ttttt", response.data);
             });
         } catch (error) {
             throw new Error('Failed to fetch data');

@@ -3,6 +3,8 @@ import Divider from "./Divider";
 import {useEffect, useState} from "react";
 import {formatCountdown, getBusType, getLoadColor} from "@utils/UtilsMethod";
 import ArrvingInfoCard from "@components/ArrvingInfoCard";
+import axios, {AxiosRequestConfig} from "axios";
+import {busServiceUrl} from "@utils/UrlsUtil";
 
 
 export interface Service {
@@ -27,6 +29,12 @@ export interface NextBus {
 
 }
 
+interface BusServiceParams  {
+    busStopCode: string,
+    serviceNo: string,
+    deviceId: string,
+}
+
 const NearbyBusItem = ({
                      serviceNo,
                      operator,
@@ -35,22 +43,41 @@ const NearbyBusItem = ({
                      nextBus3
                  }: Service) => {
 
-    const loadColor = getLoadColor(nextBus.load)
-    const loadColor2 = getLoadColor(nextBus2.load)
-    const loadColor3 = getLoadColor(nextBus3.load)
     const isWheelChairAccessible = nextBus.feature === 'WAB'
+    const [service, setService] = useState<Service>();
+    // const [countdown, setCountdown] = useState(nextBus.countDown);
+    // useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         setCountdown(prevCountdown => prevCountdown - 1);
+    //     }, 1000);
+    //
+    //     // Clean up the timer when the component unmounts
+    //     return () => {
+    //         clearInterval(timer);
+    //     };
+    // }, []); // Empty dependency array ensures that the effect runs only once
 
-    const [countdown, setCountdown] = useState(nextBus.countDown);
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCountdown(prevCountdown => prevCountdown - 1);
-        }, 1000);
 
-        // Clean up the timer when the component unmounts
-        return () => {
-            clearInterval(timer);
+    const getBusService = (busStopCode: string, busCode: string) => {
+        const params: BusServiceParams = {
+            busStopCode: busStopCode,
+            serviceNo: busCode,
+            deviceId: "1",
+        }
+        const config: AxiosRequestConfig = {
+            params: params,
         };
-    }, []); // Empty dependency array ensures that the effect runs only once
+        try {
+            axios.get<Service>(busServiceUrl, config).then((response) => {
+                setService(response.data);
+            });
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+
+    }
+
+
     return (
         <View className={'mt-1'}>
             <View className={'flex-row justify-between'}>
@@ -66,8 +93,10 @@ const NearbyBusItem = ({
                             <Image className="w-5 h-5 absolute bottom-0 right-0"
                                    source={require('../assets/wheelchair.jpg')}/>}
                     </View>
-                    <ArrvingInfoCard loadColor={loadColor} loadColor2={loadColor2} loadColor3={loadColor3}
-                                     countdown={countdown} nextBus2={nextBus2} nextBus3={nextBus3}/>
+                    <TouchableOpacity>
+                        <ArrvingInfoCard nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3} />
+                    </TouchableOpacity>
+
                 </View>
 
             </View>

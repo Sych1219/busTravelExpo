@@ -28,29 +28,16 @@ export interface NextBus {
 }
 
 const FavouriteBusItem = ({
-                     serviceNo,
-                     operator,
-                     nextBus,
-                     nextBus2,
-                     nextBus3
-                 }: Service) => {
+                              serviceNo,
+                              operator,
+                              nextBus,
+                              nextBus2,
+                              nextBus3
+                          }: Service) => {
 
-    const loadColor = getLoadColor(nextBus.load)
-    const loadColor2 = getLoadColor(nextBus2.load)
-    const loadColor3 = getLoadColor(nextBus3.load)
+
     const isWheelChairAccessible = nextBus.feature === 'WAB'
 
-    const [countdown, setCountdown] = useState(nextBus.countDown);
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCountdown(prevCountdown => prevCountdown - 1);
-        }, 1000);
-
-        // Clean up the timer when the component unmounts
-        return () => {
-            clearInterval(timer);
-        };
-    }, []); // Empty dependency array ensures that the effect runs only once
     return (
         <View className={'mt-1'}>
             <View className={'flex-row justify-between'}>
@@ -66,8 +53,8 @@ const FavouriteBusItem = ({
                             <Image className="w-5 h-5 absolute bottom-0 right-0"
                                    source={require('../assets/wheelchair.jpg')}/>}
                     </View>
-                    <ArrvingInfoCard loadColor={loadColor} loadColor2={loadColor2} loadColor3={loadColor3}
-                                     countdown={countdown} nextBus2={nextBus2} nextBus3={nextBus3}/>
+                    <ArrvingInfoCard
+                        nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3}/>
 
                 </View>
 

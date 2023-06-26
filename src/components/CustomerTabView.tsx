@@ -6,24 +6,34 @@ import {BusStopWithBusesInfoProps, RouteProps} from "../screens/NearbyScreen";
 import axios from "axios";
 import ScrollWithBusItems from "@components/ScrollWithBusItems";
 import {busArrivingInfoUrl} from "@utils/UrlsUtil";
+import * as Location from 'expo-location';
+
 
 
 // Define your initial state for the tab index and routes
 const initialLayout = {width: Dimensions.get('window').width};
 const CustomerTabView = () => {
     const [busStops, setBusStops] = useState<BusStopWithBusesInfoProps[]>([]);
-
     const [routes, setRoutes] = useState<Route[]>([]);
     const [sceneMapProps, setSceneMapProps] = useState<{ [key: string]: React.ComponentType }>({});
 
-    // const busStops = MockBusStops
-    useEffect(() => {
+    const getCurrentLocation = async () => {
         try {
+
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                // Handle permission denied
+                console.log("permission denied")
+            }
+            const { coords } = await Location.getCurrentPositionAsync();
+            const { latitude, longitude } = coords;
+            console.log("current location",latitude, longitude);
+            console.log("getting current location");
             axios.get(busArrivingInfoUrl, {
                 params: {
-                    longitude: 103.9004605,
-                    latitude: 1.4037280,
-                    stopCount: 6,
+                    longitude: longitude,
+                    latitude: latitude,
+                    stopCount: 3,
                 },
             }).then((response) => {
                 //passing the response.data to the busStop obj
@@ -42,9 +52,16 @@ const CustomerTabView = () => {
                 });
                 setSceneMapProps(tempSceneMapProps);
             });
+
+            return { latitude, longitude };
         } catch (error) {
-            console.log("error11", error);
+            // Handle error
+            return null;
         }
+    };
+    // const busStops = MockBusStops
+    useEffect(() => {
+        getCurrentLocation()
     }, []);
 
     const [index, setIndex] = useState(0);

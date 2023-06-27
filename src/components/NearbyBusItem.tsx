@@ -5,6 +5,8 @@ import {formatCountdown, getBusType, getLoadColor} from "@utils/UtilsMethod";
 import ArrvingInfoCard from "@components/ArrvingInfoCard";
 import axios, {AxiosRequestConfig} from "axios";
 import {busServiceUrl, clickOnFavouriteBus} from "@utils/UrlsUtil";
+import Constants from "expo-constants";
+import {useLocation} from "@utils/CustomerHook";
 
 
 export interface Service {
@@ -44,11 +46,17 @@ const NearbyBusItem = ({
                            busStopCode, service
                        }: NearbyBusItemProps) => {
 
+    let deviceId:string = Constants.deviceId;
+    if(!deviceId){
+        deviceId = "test"
+    }
+    console.log("device id is ", deviceId)
 
     const [serviceInside, setServiceInside] = useState<Service>(service);
     const {nextBus, nextBus2, nextBus3, serviceNo}: Service = serviceInside;
     const isWheelChairAccessible = nextBus.feature === 'WAB'
-
+    const location = useLocation().location;
+    console.log("location is ", location)
     const [isRefreshing, setIsRefreshing] = useState(false);
     const updateBusService = (busStopCode: string, busCode: string) => {
         setIsRefreshing(true);
@@ -60,11 +68,11 @@ const NearbyBusItem = ({
             params: params,
         };
         const parmas2 = {
-            deviceId: 123,
+            deviceId: deviceId,
             busStopCode,
             busCode,
-            longitude:103.9004605,
-            latitude:1.4037280,
+            longitude:location.coords.longitude,
+            latitude:location.coords.latitude,
         }
 
         //here also need to call the be for faviourite bus

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
+import Constants from "expo-constants";
+import DeviceInfo from "react-native-device-info";
 
 
 export const useLocation = () => {

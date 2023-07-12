@@ -71,8 +71,8 @@ const NearbyBusItem = ({
             deviceId: deviceId,
             busStopCode,
             busCode,
-            longitude:location.coords.longitude,
-            latitude:location.coords.latitude,
+            longitude:location.longitude,
+            latitude:location.latitude,
         }
 
         //here also need to call the be for faviourite bus

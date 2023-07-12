@@ -6,3 +6,5 @@ export const userFavoriteBusStopUrl = `${baseUrl}/user/getUserFavouriteBus`;
 export const busServiceUrl = `${baseUrl}/busStop/getBusService`;
 
 export const clickOnFavouriteBus = `${baseUrl}/user/clickOnFavouriteBus`;
+
+export const routesUrl = `${baseUrl}/busRoute/getRoutes`;

@@ -22,11 +22,8 @@ export const useLocation = () => {
                 }
 
                 const { coords } = await Location.getCurrentPositionAsync();
-                console.log("coords", coords)
                 const { latitude, longitude } = coords;
-                console.log("latitude", latitude, longitude)
                 setLocation({ latitude, longitude });
-                console.log("location", location)
             } catch (error) {
                 setErrorMsg('Failed to fetch location');
             }
@@ -35,6 +32,5 @@ export const useLocation = () => {
         getLocation();
     }, []);
 
-    console.log("lreturn ocation", location)
     return { location, errorMsg };
 };

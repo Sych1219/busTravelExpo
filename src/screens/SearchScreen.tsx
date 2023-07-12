@@ -1,13 +1,21 @@
-import {View, Text, SafeAreaView} from "react-native";
-import SearchBar from "@components/SearchBar";
-import BusRoutes from "@components/BusRoutes";
-
+import SearchView from "@components/SearchView";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import StepItem from "@components/StepItem";
+import RouteView from "@components/RouteView";
+import {Leg} from "@components/BusRoutes";
+export type StackParamList = {
+    SearchView: undefined;
+    RouteView: Leg;
+};
 const SearchScreen = () => {
+
+    const Stack = createNativeStackNavigator<StackParamList>();
     return (
-        <SafeAreaView>
-            {/*search bar*/}
-            <SearchBar/>
-        </SafeAreaView>
+            <Stack.Navigator>
+                <Stack.Screen name="SearchView" component={SearchView} options={{presentation: 'modal', headerShown: false}}/>
+                <Stack.Screen name="RouteView" component={RouteView} />
+            </Stack.Navigator>
+        // <SearchView/>
     );
 }
 

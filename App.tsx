@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import {NavigationContainer} from "@react-navigation/native";
 import NearbyScreen from "./src/screens/NearbyScreen";
 
@@ -8,7 +8,7 @@ import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {HeartIcon, MapIcon} from "react-native-heroicons/outline";
 import MapView from "react-native-maps";
 import {Marker} from "react-native-maps";
-import {SafeAreaView, View} from 'react-native';
+import {SafeAreaView, Text, TextInput, View} from 'react-native';
 
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import {GOOGLE_API_KEY} from "@utils/Keys";

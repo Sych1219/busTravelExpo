@@ -3,7 +3,6 @@ import {useLocation} from "@utils/CustomerHook";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {routesUrl} from "@utils/UrlsUtil";
-import {FontAwesome5} from '@expo/vector-icons';
 import Divider from "@components/Divider";
 import StepItem from "@components/StepItem";
 import {useNavigation} from "@react-navigation/native";
@@ -160,9 +159,9 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                     {legs.map((leg, indexLeg) => (
                         <View key={indexLeg}>
                             <TouchableOpacity className={'w-full flex-row px-4 py-2'}
-                                              onPress={() => {
-                                                  console.log("leg before", leg)
-                                                  navigation.navigate('RouteView',leg)}}>
+                                              onPress={() =>
+                                                  navigation.navigate('RouteView', leg)
+                                              }>
                                 {leg.steps.map((step, indexStep) => (
                                     <StepItem key={indexStep} step={step} index={indexStep}
                                               showArrow={indexStep !== (leg.steps.length - 1)}/>

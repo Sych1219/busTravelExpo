@@ -160,7 +160,7 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                         <View key={indexLeg}>
                             <TouchableOpacity className={'w-full flex-row px-4 py-2'}
                                               onPress={() =>
-                                                  navigation.navigate('RouteView', leg)
+                                                  navigation.navigate('ListWalkAndStopsView', leg)
                                               }>
                                 {leg.steps.map((step, indexStep) => (
                                     <StepItem key={indexStep} step={step} index={indexStep}

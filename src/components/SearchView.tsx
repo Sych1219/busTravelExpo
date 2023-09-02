@@ -1,5 +1,4 @@
-import {View, Text, SafeAreaView, TextInput, Button} from "react-native";
-import Test from "@components/Test";
+import {View, Text, SafeAreaView, TextInput, Button, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import {GOOGLE_API_KEY} from "@utils/Keys";
 import {GooglePlacesAutocomplete, GooglePlacesAutocompleteRef} from "react-native-google-places-autocomplete";
 import BusRoutes from "@components/BusRoutes";

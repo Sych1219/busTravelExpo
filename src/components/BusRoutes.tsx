@@ -162,8 +162,9 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                                               onPress={() =>
                                                   navigation.navigate('ListWalkAndStopsView', leg)
                                               }>
+                                {/*//todo if the let.steps size >=3, then show the first 1 step, and the last step*/}
                                 {leg.steps.map((step, indexStep) => (
-                                    <StepItem key={indexStep} step={step} index={indexStep}
+                                    <StepItem key={indexStep} step={step} index={indexStep} differentBusCodeCounts={leg.steps.length}
                                               showArrow={indexStep !== (leg.steps.length - 1)}/>
 
                                 ))

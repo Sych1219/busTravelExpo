@@ -11,22 +11,6 @@ const busArrivingInfoUrl = `${baseUrl}/getBusArrivingInfo`;
     stopCount: number;
 }
 
-//the method is use axios to fetch data from backend, return BusStopWithBusesInfoProps[]
-// const fetchData = async (params: BusArrivingRequestParams) => {
-//         const config: AxiosRequestConfig = {
-//         params: params,
-//     };
-//     try {
-//         const response = await axios.get<BusStopWithBusesInfoProps[]>(busArrivingInfoUrl, config);
-//         const busStopWithBusesInfoProps: BusStopWithBusesInfoProps[] = response.data;
-//         console.log("busStopWithBusesInfoProps",busStopWithBusesInfoProps); // Use the parsed data as needed
-//     } catch (error) {
-//         console.error('Error fetching data:', error);
-//     }
-// };
-//
-// fetchData({longitude: 1, latitude: 1, stopCount: 1});
-// export default fethData;
 export async function fetchBusArrivingInfoData(params: BusArrivingRequestParams): Promise<BusStopWithBusesInfoProps[]> {
     const config: AxiosRequestConfig = {
         params: params,

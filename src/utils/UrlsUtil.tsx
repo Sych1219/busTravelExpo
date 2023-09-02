@@ -8,3 +8,5 @@ export const busServiceUrl = `${baseUrl}/busStop/getBusService`;
 export const clickOnFavouriteBus = `${baseUrl}/user/clickOnFavouriteBus`;
 
 export const routesUrl = `${baseUrl}/busRoute/getRoutes`;
+
+export const busRoutesByStopNameUrl = `${baseUrl}/busStop/getBusRoutesByStopName`;

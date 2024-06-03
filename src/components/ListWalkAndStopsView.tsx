@@ -1,4 +1,4 @@
-import {View, Text, FlatList, TouchableOpacity} from "react-native";
+import {View, Text, FlatList, TouchableOpacity, ScrollView} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../screens/SearchScreen";
 import {LatLng, TextValue} from "@components/BusRoutes";
@@ -6,6 +6,8 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {busRoutesByStopNameUrl} from "@utils/UrlsUtil";
 import BusStopsOnBarView from "@components/BusStopsOnBarView";
+import {NextBus} from "@components/NearbyBusItem";
+import TwoPointsWithCurve from "@components/TwoPointsWithCurve";
 
 
 type RouteViewProp = RouteProp<StackParamList, 'ListWalkAndStopsView'>;
@@ -51,9 +53,19 @@ export interface BusRouteVO {
 }
 
 export interface BusServiceNoAndBusRouteVOs {
-    serviceNo: string;
+    serviceNo?: string;
     busRouteVOs: BusRouteVO[];
+    busArrivingInfo?: BusArrivingInfo;
 }
+
+//bus arrving info
+export interface BusArrivingInfo {
+    serviceNo: string;
+    toArriveBusStopCode: string;
+    operator: string;
+    nextBus: NextBus;
+}
+
 
 const ListWalkAndStopsView = () => {
     const route = useRoute<RouteViewProp>();
@@ -89,6 +101,8 @@ const ListWalkAndStopsView = () => {
         fetchBusServiceNoWithStopRouteVOs(startAndEndStopInfos).then((newFetch) => {
             busServiceNoAndRouteVOs.push(...newFetch)
             setBusServiceNoAndRouteVOs(newFetch);
+        }).catch((error) => {
+            console.log("fetchBusServiceNoWithStopRouteVOs error:", error);
         });
     }, []);
 
@@ -118,16 +132,49 @@ const ListWalkAndStopsView = () => {
         const busRouteVOs = response.data;
         return busRouteVOs;
     }
-
+    //"busStopCode": "65009",
+    const arrvingInfo: BusArrivingInfo = {
+        serviceNo: "34",
+        toArriveBusStopCode: "65221",
+        operator: "SBST",
+        nextBus: {
+            estimatedArrival: "2021-09-01T12:00:00+08:00",
+            load: "SEA",
+            feature: "WAB",
+            type: "SD",
+            countDown: 1,
+            originCode: "65221",
+            destinationCode: "65222",
+            latitude: "1.234567",
+            longitude: "2.345678",
+            visitNumber: "1",
+        }
+    };
+    const busVos = busServiceNoAndRouteVOs.flatMap((busServiceNoAndRouteVO, index) => {
+        return busServiceNoAndRouteVO.busRouteVOs
+    });
+    const busvos = busServiceNoAndRouteVOs.flatMap((busServiceNoAndRouteVO, index) => {
+        return busServiceNoAndRouteVO.busRouteVOs
+    });
+    console.log("busvos is ", busvos)
     return (
-        <View>
+        <View className={'w-full h-full flex-col space-x-1'}>
             {
-                busServiceNoAndRouteVOs.map((busServiceNoAndRouteVO, index) => {
-                    return (
-                        <BusStopsOnBarView serviceNo={busServiceNoAndRouteVO.serviceNo}
-                                           busRouteVOs={busServiceNoAndRouteVO.busRouteVOs}/>
-                    )
-                })
+
+                busVos != null && busVos.length > 0
+                && <TwoPointsWithCurve busRouteVOs={busVos}/>
+                // busServiceNoAndRouteVOs/*.filter((_,index)=>index==0)*/
+                //     .map((busServiceNoAndRouteVO, index) => {
+                //         console.log("busServiceNoAndRouteVO is ", busServiceNoAndRouteVO)
+                //     return (
+                //         // <BusStopsOnBarView serviceNo={busServiceNoAndRouteVO.serviceNo}
+                //         //                    busRouteVOs={busServiceNoAndRouteVO.busRouteVOs}
+                //         //                    busArrivingInfo={arrvingInfo}/>
+                //         <TwoPointsWithCurve /*serviceNo={busServiceNoAndRouteVO.serviceNo}*/
+                //                             busRouteVOs={busServiceNoAndRouteVO.busRouteVOs}
+                //                             busArrivingInfo={arrvingInfo}/>
+                //     )
+                // })
             }
         </View>)
 };

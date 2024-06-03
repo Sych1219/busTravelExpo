@@ -31,7 +31,7 @@ export interface NextBus {
 
 }
 
-interface BusServiceParams {
+export interface BusServiceParams {
     busStopCode: string,
     busCode: string,
 

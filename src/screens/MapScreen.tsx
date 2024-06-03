@@ -59,7 +59,7 @@ const MapScreen: React.FC = () => {
                     origin,
                     destination,
                     // transit_mode: [TransitMode.bus, TransitMode.subway],
-                    key: "AIzaSyBbmrDmsRe2KMhjXdwK_Dk8h37yxGLbtew"
+                    key: ""
                 }
             });
 

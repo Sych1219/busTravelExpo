@@ -14,6 +14,7 @@ import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete'
 import {GOOGLE_API_KEY} from "@utils/Keys";
 import MapScreen from "./src/screens/MapScreen";
 import SearchScreen from "./src/screens/SearchScreen";
+import {BusTravelOnTimeBar} from "@components/BusTravelOnTimeBar";
 
 
 type RootParamList = {
@@ -21,6 +22,8 @@ type RootParamList = {
     NearbyScreen: undefined
     SearchScreen: undefined
     Screen3: { paramB: string; paramC: number }
+    BusTravelOnTimeBar: undefined
+
 }
 export default function App() {
     const Stack = createNativeStackNavigator();
@@ -49,7 +52,7 @@ export default function App() {
         //
         // </View>
         <NavigationContainer>
-            <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName={'SearchScreen'}>
+            <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName={'BusTravelOnTimeBar'}>
                 <Tab.Screen name="NearbyScreen" component={NearbyScreen} options={{
                     title: 'Nearby',
                     headerShown: false,
@@ -73,8 +76,18 @@ export default function App() {
                         <HeartIcon size={size} color={color}/>
                     ),
                     tabBarLabelPosition: 'beside-icon',
+                    unmountOnBlur: true,
                 }}/>
-
+                {/*    BusTravelOnTimeBar*/}
+                <Tab.Screen name="BusTravelOnTimeBar" component={BusTravelOnTimeBar} options={{
+                    title: 'BusTravelOnTimeBar',
+                    headerShown: false,
+                    tabBarIcon: ({color, size}) => (
+                        <HeartIcon size={size} color={color}/>
+                    ),
+                    tabBarLabelPosition: 'beside-icon',
+                    unmountOnBlur: true,
+                }}/>
             </Tab.Navigator>
         </NavigationContainer>
 

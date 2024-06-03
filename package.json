@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "start:dev": "expo start --dev-client"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.3.32",
@@ -23,7 +24,7 @@
     "nativewind": "^2.0.11",
     "polyline": "^0.2.0",
     "react": "18.2.0",
-    "react-native": "0.72.4",
+    "react-native": "0.72.10",
     "react-native-device-info": "^10.6.0",
     "react-native-google-places-autocomplete": "^2.5.1",
     "react-native-heroicons": "^3.2.0",

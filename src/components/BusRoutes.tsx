@@ -56,6 +56,16 @@ export interface Route {
     legs: Leg[];
 }
 
+export interface StartEndStop {
+    startStopName: string;
+    endStopName: string;
+}
+
+export interface StartEndStopServiceNo {
+    startEndStops: StartEndStop[];
+    serviceNo: string;
+}
+
 const mockLegs: Leg[] = [
     {
         distance: {text: "2.5 km", value: 2500},
@@ -73,7 +83,7 @@ const mockLegs: Leg[] = [
                 arrivalStop: "Bus Stop B",
                 endLocation: {lat: 2.345678, lng: 3.456789},
                 numStops: 3,
-                busCode: "123",
+                busCode: "11",
                 travelMode: "transit",
                 polyline: {points: "abc123xyz"},
             },
@@ -85,7 +95,7 @@ const mockLegs: Leg[] = [
                 arrivalStop: "Bus Stop C",
                 endLocation: {lat: 3.456789, lng: 4.567890},
                 numStops: 2,
-                busCode: "456",
+                busCode: "12",
                 travelMode: "transit",
                 polyline: {points: "def456uvw"},
             },
@@ -107,7 +117,7 @@ const mockLegs: Leg[] = [
                 arrivalStop: "Bus Stop B",
                 endLocation: {lat: 2.345678, lng: 3.456789},
                 numStops: 3,
-                busCode: "123",
+                busCode: "22",
                 travelMode: "transit",
                 polyline: {points: "abc123xyz"},
             },
@@ -119,7 +129,7 @@ const mockLegs: Leg[] = [
                 arrivalStop: "Bus Stop C",
                 endLocation: {lat: 3.456789, lng: 4.567890},
                 numStops: 2,
-                busCode: "456",
+                busCode: "221",
                 travelMode: "transit",
                 polyline: {points: "def456uvw"},
             },
@@ -127,9 +137,26 @@ const mockLegs: Leg[] = [
     },
     // Add more mock legs here...
 ];
+
+function mapLegToStartEndStopServiceNo(leg: Leg): StartEndStopServiceNo {
+    const startEndStops: StartEndStop[] = leg.steps.map((step) => {
+        return {
+            startStopName: step.departureStop,
+            endStopName: step.arrivalStop,
+        }
+    });
+    return {
+        startEndStops: startEndStops,
+        serviceNo: leg.steps[0].busCode,
+    }
+}
+
+
 const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
     const {location, errorMsg} = useLocation();
     const [legs, setLegs] = useState<Leg[]>(mockLegs);
+    const [startEndStopServiceNos, setStartEndStopServiceNos]
+        = useState<StartEndStopServiceNo[]>([]);
     //based on the location, or destinationPlaceId change, will fetch the bus routes
     useEffect(() => {
         if (location != null && destinationPlaceId != null && destinationPlaceId.length > 0) {
@@ -140,10 +167,15 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                 console.log("routes length", routes.length);
                 //from the routes, get the legs
                 const legs = routes.map((route) => route.legs).flat();
+                const startEndStopServiceNos1: StartEndStopServiceNo[] = legs.map((leg) => {
+                    return mapLegToStartEndStopServiceNo(leg);
+                });
+                setStartEndStopServiceNos(startEndStopServiceNos1);
                 console.log("legs length", legs.length);
                 setLegs(legs);
-
-            })
+            }).catch((error) => {
+                console.log("error in BusRoutes.tsx", error);
+            });
 
         }
 
@@ -164,7 +196,8 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                                               }>
                                 {/*//todo if the let.steps size >=3, then show the first 1 step, and the last step*/}
                                 {leg.steps.map((step, indexStep) => (
-                                    <StepItem key={indexStep} step={step} index={indexStep} differentBusCodeCounts={leg.steps.length}
+                                    <StepItem key={indexStep} step={step} index={indexStep}
+                                              differentBusCodeCounts={leg.steps.length}
                                               showArrow={indexStep !== (leg.steps.length - 1)}/>
 
                                 ))

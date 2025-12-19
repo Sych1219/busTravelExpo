@@ -56,7 +56,7 @@ Bottom Nav: Nearby | Favourite | Search | BusTravel
   - Full stops list preview (first 3 stops).
   - Last updated timestamp.
   - Actions: `Notify`, `Save`, `Share` (`Save` stores this route card into `Favourite`).
-- **Details** button opens a lightweight modal sheet (no navigation stack).
+- **Details** button opens a lightweight modal sheet with full stop list, service notes, and first/last bus times; swipe down or tap `Close` to dismiss (no navigation stack).
 
 ### Interaction Model (low-gesture)
 - Tap `Change Stop` to open a bottom sheet with nearby stops and search.

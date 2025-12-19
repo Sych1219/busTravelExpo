@@ -19,3 +19,4 @@ web-build/
 src/utils/Keys.tsx
 ```
 /.expo/
+.env

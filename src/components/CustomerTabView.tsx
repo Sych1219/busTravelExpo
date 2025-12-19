@@ -1,12 +1,13 @@
-import {Dimensions, StyleSheet, Text, View} from "react-native";
+import {Dimensions, Text, TouchableOpacity, View} from "react-native";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useEffect, useState} from "react";
-import {Route, SceneMap, TabBar, TabView} from "react-native-tab-view";
+import {Route, SceneMap, TabView} from "react-native-tab-view";
 import {BusStopWithBusesInfoProps, RouteProps} from "../screens/NearbyScreen";
 import axios from "axios";
 import ScrollWithBusItems from "@components/ScrollWithBusItems";
 import {busArrivingInfoUrl} from "@utils/UrlsUtil";
 import * as Location from 'expo-location';
+import {useNavigation} from "@react-navigation/native";
 
 
 // Define your initial state for the tab index and routes
@@ -15,6 +16,12 @@ const CustomerTabView = () => {
     const [busStops, setBusStops] = useState<BusStopWithBusesInfoProps[]>([]);
     const [routes, setRoutes] = useState<Route[]>([]);
     const [sceneMapProps, setSceneMapProps] = useState<{ [key: string]: React.ComponentType }>({});
+
+    const [index, setIndex] = useState(0);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const insets = useSafeAreaInsets();
+    const navigation = useNavigation<any>();
+    const dockContentPadding = 24 + insets.bottom;
 
     const getCurrentLocation = async () => {
         try {
@@ -40,6 +47,7 @@ const CustomerTabView = () => {
                 //passing the response.data to the busStop obj
                 const busStopsTemp = JSON.parse(JSON.stringify(response.data)) as BusStopWithBusesInfoProps[];
                 setBusStops(busStopsTemp);
+                setLastUpdated(new Date());
 
                 const routesInitial: RouteProps[] = busStopsTemp.map((busStop, index) => ({
                     key: index.toString(),
@@ -49,7 +57,10 @@ const CustomerTabView = () => {
                 const tempSceneMapProps: { [key: string]: React.ComponentType } = {};
                 busStopsTemp.forEach((busStopWithBusesInfo, index) => {
                     tempSceneMapProps[index.toString()] = (() => (
-                        <ScrollWithBusItems busStopWithBusesInfo={busStopWithBusesInfo}/>));
+                        <ScrollWithBusItems
+                            busStopWithBusesInfo={busStopWithBusesInfo}
+                            contentPaddingBottom={dockContentPadding}
+                        />));
                 });
                 setSceneMapProps(tempSceneMapProps);
             });
@@ -65,42 +76,87 @@ const CustomerTabView = () => {
         getCurrentLocation()
     }, []);
 
-    const [index, setIndex] = useState(0);
-
-    const insets = useSafeAreaInsets();
-    const renderTabBar = (props: any) => (
-        <TabBar {...props} activeColor={'black'} inactiveColor={'gray'} indicatorStyle={{backgroundColor: 'black'}}
-                scrollEnabled={true}
-            // labelStyle={{ flex: 1 }}
-                renderLabel={({route, focused, color}) => (
-                    <Text className={'font-extrabold text-lg'} numberOfLines={1} style={{color, width: '100%'}}>
-                        {route.title}
-                    </Text>
-                )}
-                style={[styles.tabBar, {paddingTop: insets.top}]}
-        />
-    );
-
     const handleIndexChange = (index: number) => {
         setIndex(index);
     };
 
+    const currentStop = busStops[index];
+    const formatTime = (date: Date | null) => {
+        if (!date) return '--:--';
+        return date.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'});
+    };
+
     return (
         routes?.length > 0 && sceneMapProps && Object.keys(sceneMapProps).length > 0 ?
-            <TabView
-                navigationState={{index, routes}}
-                renderScene={SceneMap(sceneMapProps)}
-                onIndexChange={handleIndexChange}
-                initialLayout={initialLayout}
-                renderTabBar={renderTabBar}
-            /> : (<View><Text>Loading...</Text></View>)
+            <View className="flex-1 bg-slate-50">
+                <View className="absolute -top-24 -right-12 w-64 h-64 rounded-full bg-amber-100 opacity-70"/>
+                <View className="absolute top-24 -left-16 w-56 h-56 rounded-full bg-emerald-100 opacity-50"/>
+
+                <View className="px-4" style={{paddingTop: insets.top + 8}}>
+                    <View className="flex-row items-center justify-between">
+                        <View>
+                            <Text className="text-3xl font-extrabold text-slate-900">Nearby</Text>
+                            <Text className="mt-1 text-xs text-slate-500">
+                                Updated: {formatTime(lastUpdated)} · {currentStop?.busStopRoadName ?? 'Location'}
+                            </Text>
+                        </View>
+                        <View className="flex-row items-center space-x-2">
+                            <TouchableOpacity
+                                className="rounded-full bg-white px-3 py-2"
+                                onPress={() => navigation.navigate('SearchScreen')}
+                            >
+                                <Text className="text-xs font-semibold text-slate-700">Search</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity className="rounded-full bg-white px-3 py-2">
+                                <Text className="text-xs font-semibold text-slate-700">Filter</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                className="rounded-full bg-slate-900 px-3 py-2"
+                                onPress={getCurrentLocation}
+                            >
+                                <Text className="text-xs font-semibold text-white">Refresh</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-1 pr-3">
+                                <Text className="text-lg font-bold text-slate-900">
+                                    {currentStop?.busStopDescription ?? 'Nearby stops'}
+                                </Text>
+                                <Text className="mt-1 text-xs text-slate-500">
+                                    {currentStop?.busStopRoadName ?? 'Road'} · Stop Code {currentStop?.busStopCode ?? '--'}
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                className="rounded-full bg-slate-900 px-3 py-2"
+                                onPress={() => navigation.navigate('SearchScreen')}
+                            >
+                                <Text className="text-xs font-semibold text-white">Change Stop</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text className="mt-2 text-xs text-slate-400">Swipe left or right to switch stops</Text>
+                    </View>
+                </View>
+
+                <View className="flex-1">
+                    <TabView
+                        navigationState={{index, routes}}
+                        renderScene={SceneMap(sceneMapProps)}
+                        onIndexChange={handleIndexChange}
+                        initialLayout={initialLayout}
+                        renderTabBar={() => null}
+                    />
+                </View>
+            </View>
+            : (
+                <View className="flex-1 items-center justify-center">
+                    <Text className="text-base text-slate-500">Loading...</Text>
+                </View>
+            )
 
 
     );
 }
-const styles = StyleSheet.create({
-    tabBar: {
-        backgroundColor: 'white',
-    },
-});
 export default CustomerTabView;

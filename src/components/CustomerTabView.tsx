@@ -9,7 +9,6 @@ import {busArrivingInfoUrl} from "@utils/UrlsUtil";
 import * as Location from 'expo-location';
 
 
-
 // Define your initial state for the tab index and routes
 const initialLayout = {width: Dimensions.get('window').width};
 const CustomerTabView = () => {
@@ -20,14 +19,16 @@ const CustomerTabView = () => {
     const getCurrentLocation = async () => {
         try {
 
-            const { status } = await Location.requestForegroundPermissionsAsync();
+            const {status} = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 // Handle permission denied
                 console.log("permission denied")
             }
-            const { coords } = await Location.getCurrentPositionAsync();
-            const { latitude, longitude } = coords;
-            console.log("current location",latitude, longitude);
+            // longitude=103.9004605&latitude=1.403728
+            // const { coords } = await Location.getCurrentPositionAsync();
+            let latitude = 1.403728;
+            let longitude = 103.9004605
+            console.log("current location", latitude, longitude);
             console.log("getting current location");
             axios.get(busArrivingInfoUrl, {
                 params: {
@@ -53,7 +54,7 @@ const CustomerTabView = () => {
                 setSceneMapProps(tempSceneMapProps);
             });
 
-            return { latitude, longitude };
+            return {latitude, longitude};
         } catch (error) {
             // Handle error
             return null;
@@ -86,13 +87,13 @@ const CustomerTabView = () => {
 
     return (
         routes?.length > 0 && sceneMapProps && Object.keys(sceneMapProps).length > 0 ?
-        <TabView
-            navigationState={{index, routes}}
-            renderScene={SceneMap(sceneMapProps)}
-            onIndexChange={handleIndexChange}
-            initialLayout={initialLayout}
-            renderTabBar={renderTabBar}
-        /> : (<View><Text>Loading...</Text></View>)
+            <TabView
+                navigationState={{index, routes}}
+                renderScene={SceneMap(sceneMapProps)}
+                onIndexChange={handleIndexChange}
+                initialLayout={initialLayout}
+                renderTabBar={renderTabBar}
+            /> : (<View><Text>Loading...</Text></View>)
 
 
     );

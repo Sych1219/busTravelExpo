@@ -11,7 +11,7 @@ import {Marker} from "react-native-maps";
 import {SafeAreaView, Text, TextInput, View} from 'react-native';
 
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {GOOGLE_API_KEY} from "@utils/Keys";
+// import {GOOGLE_API_KEY} from "@utils/Keys";
 import MapScreen from "./src/screens/MapScreen";
 import SearchScreen from "./src/screens/SearchScreen";
 import {BusTravelOnTimeBar} from "@components/BusTravelOnTimeBar";
@@ -37,7 +37,7 @@ export default function App() {
     const markerLatitude = 1.2897;
     const markerLongitude = 103.8501;
 
-    console.log('API_KEY', GOOGLE_API_KEY);
+    // console.log('API_KEY', GOOGLE_API_KEY);
     return (
         // <View>
         //     <MapView

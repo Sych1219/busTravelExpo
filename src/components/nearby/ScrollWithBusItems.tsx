@@ -1,6 +1,6 @@
 import {ScrollView, Text, View} from "react-native";
-import {BusStopWithBusesInfoProps} from "../screens/NearbyScreen";
-import NearbyBusItem from "@components/NearbyBusItem";
+import {BusStopWithBusesInfoProps} from "../../screens/NearbyScreen";
+import NearbyBusItem from "@components/shared/NearbyBusItem";
 
 type FilterMode = 'all' | 'double';
 type ScrollWithBusItemsProps = {

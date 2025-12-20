@@ -1,6 +1,6 @@
 import React from "react";
-import CustomerTabView from "@components/CustomerTabView";
-import {Service} from "@components/NearbyBusItem";
+import NearbyTabView from "@components/nearby/NearbyTabView";
+import {Service} from "@components/shared/NearbyBusItem";
 
 export interface BusStopWithBusesInfoProps {
     busStopRoadName: string;
@@ -17,7 +17,7 @@ export interface RouteProps {
 }
 const NearbyScreen = () => {
     return (
-        <CustomerTabView />
+        <NearbyTabView />
     );
 }
 

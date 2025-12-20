@@ -2,9 +2,9 @@ import {Dimensions, Text, TouchableOpacity, View} from "react-native";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useEffect, useState} from "react";
 import {Route, TabView} from "react-native-tab-view";
-import {BusStopWithBusesInfoProps, RouteProps} from "../screens/NearbyScreen";
+import {BusStopWithBusesInfoProps, RouteProps} from "../../screens/NearbyScreen";
 import axios from "axios";
-import ScrollWithBusItems from "@components/ScrollWithBusItems";
+import ScrollWithBusItems from "@components/nearby/ScrollWithBusItems";
 import {busArrivingInfoUrl} from "@utils/UrlsUtil";
 import * as Location from 'expo-location';
 import {useNavigation} from "@react-navigation/native";
@@ -13,7 +13,7 @@ import {useNavigation} from "@react-navigation/native";
 // Define your initial state for the tab index and routes
 const initialLayout = {width: Dimensions.get('window').width};
 type FilterMode = 'all' | 'double';
-const CustomerTabView = () => {
+const NearbyTabView = () => {
     const [busStops, setBusStops] = useState<BusStopWithBusesInfoProps[]>([]);
     const [routes, setRoutes] = useState<Route[]>([]);
 
@@ -173,4 +173,4 @@ const CustomerTabView = () => {
 
     );
 }
-export default CustomerTabView;
+export default NearbyTabView;

@@ -1,5 +1,5 @@
 import {View, Text} from "react-native";
-import {LegViewProps} from "@components/RouteView";
+import {LegViewProps} from "@components/search/RouteView";
 import{Marker, Polyline} from "react-native-maps";
 
 const LegView = ({steps}: LegViewProps) => {

@@ -1,5 +1,5 @@
 import {Text, TouchableOpacity, View} from "react-native";
-import {NextBus} from "@components/NearbyBusItem";
+import {NextBus} from "@components/shared/NearbyBusItem";
 import {formatCountdown, getLoadColor} from "@utils/UtilsMethod";
 import React, {useEffect, useState} from "react";
 import * as Progress from 'react-native-progress';

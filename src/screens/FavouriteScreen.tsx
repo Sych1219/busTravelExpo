@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {SafeAreaView, Text} from "react-native";
-import NearbyBusItem, {NextBus} from "@components/NearbyBusItem";
+import NearbyBusItem, {NextBus} from "@components/shared/NearbyBusItem";
 import axios, {AxiosRequestConfig} from "axios";
 import {userFavoriteBusStopUrl} from "@utils/UrlsUtil";
-import FavouriteBusItem from "@components/FavouriteBusItem";
+import FavouriteBusItem from "@components/favourite/FavouriteBusItem";
 
 
 interface FavouriteBus {

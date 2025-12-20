@@ -1,13 +1,13 @@
 import {View, Text, SafeAreaView, TextInput, Button, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import {GOOGLE_API_KEY} from "@utils/Keys";
 import {GooglePlacesAutocomplete, GooglePlacesAutocompleteRef} from "react-native-google-places-autocomplete";
-import BusRoutes from "@components/BusRoutes";
+import BusRoutes from "@components/search/BusRoutes";
 import {useRef, useState} from "react";
-import BusAnimation from "@components/BusAnimation";
-import TwoPointsWithCurve from "@components/TwoPointsWithCurve";
-import {BusServiceNoAndBusRouteVOs, BusStopVO} from "@components/ListWalkAndStopsView";
-import TestAnimationRestart from "@components/TestAnimationRestart";
-import TestHookAndInterval from "@components/TestHookAndInterval";
+import BusAnimation from "@components/search/BusAnimation";
+import TwoPointsWithCurve from "@components/search/TwoPointsWithCurve";
+import {BusServiceNoAndBusRouteVOs, BusStopVO} from "@components/search/ListWalkAndStopsView";
+import TestAnimationRestart from "@components/search/TestAnimationRestart";
+import TestHookAndInterval from "@components/search/TestHookAndInterval";
 
 const SearchView = () => {
     const [placeId, setPlaceId] = useState<string>("");

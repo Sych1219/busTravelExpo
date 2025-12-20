@@ -1,6 +1,6 @@
 import {Text, TouchableOpacity, View} from "react-native";
 import {FontAwesome5, MaterialIcons} from "@expo/vector-icons";
-import {Step} from "@components/BusRoutes";
+import {Step} from "@components/search/BusRoutes";
 
 interface StepItemProps {
     step: Step;

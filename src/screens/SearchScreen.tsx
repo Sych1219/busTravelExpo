@@ -1,9 +1,9 @@
-import SearchView from "@components/SearchView";
+import SearchView from "@components/search/SearchView";
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import StepItem from "@components/StepItem";
-import RouteView from "@components/RouteView";
-import {Leg} from "@components/BusRoutes";
-import ListWalkAndStopsView from "@components/ListWalkAndStopsView";
+import StepItem from "@components/search/StepItem";
+import RouteView from "@components/search/RouteView";
+import {Leg} from "@components/search/BusRoutes";
+import ListWalkAndStopsView from "@components/search/ListWalkAndStopsView";
 
 export type StackParamList = {
     SearchView: undefined;

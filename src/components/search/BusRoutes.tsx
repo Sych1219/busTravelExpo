@@ -3,10 +3,10 @@ import {useLocation} from "@utils/CustomerHook";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {routesUrl} from "@utils/UrlsUtil";
-import Divider from "@components/Divider";
-import StepItem from "@components/StepItem";
+import Divider from "@components/search/Divider";
+import StepItem from "@components/search/StepItem";
 import {useNavigation} from "@react-navigation/native";
-import {StackParamList} from "../screens/SearchScreen";
+import {StackParamList} from "../../screens/SearchScreen";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 
 interface BusRoutesProps {

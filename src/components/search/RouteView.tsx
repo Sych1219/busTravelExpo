@@ -1,10 +1,10 @@
 import {View, Text} from "react-native";
-import {Leg} from "@components/BusRoutes";
+import {Leg} from "@components/search/BusRoutes";
 import {RouteProp, useRoute} from "@react-navigation/native";
-import {StackParamList} from "../screens/SearchScreen";
+import {StackParamList} from "../../screens/SearchScreen";
 import MapView from "react-native-maps";
 import polyline from 'polyline';
-import LegView from "@components/LegView";
+import LegView from "@components/search/LegView";
 
 interface RouteViewProps {
     leg: Leg;

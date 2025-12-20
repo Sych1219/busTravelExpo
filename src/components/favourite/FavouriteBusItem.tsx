@@ -1,7 +1,7 @@
 import {Image, Text, TouchableOpacity, View} from "react-native";
-import Divider from "./Divider";
 import {useEffect, useState} from "react";
-import ArrvingInfoCard from "@components/ArrvingInfoCard";
+import ArrvingInfoCard from "@components/favourite/ArrvingInfoCard";
+import Divider from "@components/search/Divider";
 import {getBusType, getLoadColor} from "@utils/UtilsMethod";
 
 
@@ -51,7 +51,7 @@ const FavouriteBusItem = ({
                             <Text className={'w-25 h-5 '}>{getBusType(nextBus.type)}</Text>}
                         {isWheelChairAccessible &&
                             <Image className="w-5 h-5 absolute bottom-0 right-0"
-                                   source={require('../assets/wheelchair.jpg')}/>}
+                                   source={require('../../assets/wheelchair.jpg')}/>}
                     </View>
                     <ArrvingInfoCard
                         nextBus={nextBus} nextBus2={nextBus2} nextBus3={nextBus3} isRefreshing={false}/>

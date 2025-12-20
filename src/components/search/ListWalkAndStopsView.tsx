@@ -1,13 +1,13 @@
 import {View, Text, FlatList, TouchableOpacity, ScrollView} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
-import {StackParamList} from "../screens/SearchScreen";
-import {LatLng, TextValue} from "@components/BusRoutes";
+import {StackParamList} from "../../screens/SearchScreen";
+import {LatLng, TextValue} from "@components/search/BusRoutes";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {busRoutesByStopNameUrl} from "@utils/UrlsUtil";
-import BusStopsOnBarView from "@components/BusStopsOnBarView";
-import {NextBus} from "@components/NearbyBusItem";
-import TwoPointsWithCurve from "@components/TwoPointsWithCurve";
+import BusStopsOnBarView from "@components/search/BusStopsOnBarView";
+import {NextBus} from "@components/shared/NearbyBusItem";
+import TwoPointsWithCurve from "@components/search/TwoPointsWithCurve";
 
 
 type RouteViewProp = RouteProp<StackParamList, 'ListWalkAndStopsView'>;

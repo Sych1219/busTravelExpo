@@ -14,7 +14,7 @@ import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete'
 // import {GOOGLE_API_KEY} from "@utils/Keys";
 import MapScreen from "./src/screens/MapScreen";
 import SearchScreen from "./src/screens/SearchScreen";
-import {BusTravelOnTimeBar} from "@components/BusTravelOnTimeBar";
+import {BusTravelOnTimeBar} from "@components/ontimebar/BusTravelOnTimeBar";
 
 
 type RootParamList = {

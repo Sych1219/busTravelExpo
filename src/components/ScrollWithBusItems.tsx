@@ -2,13 +2,18 @@ import {ScrollView, Text, View} from "react-native";
 import {BusStopWithBusesInfoProps} from "../screens/NearbyScreen";
 import NearbyBusItem from "@components/NearbyBusItem";
 
+type FilterMode = 'all' | 'double';
 type ScrollWithBusItemsProps = {
     busStopWithBusesInfo: BusStopWithBusesInfoProps;
     contentPaddingBottom?: number;
+    filterMode?: FilterMode;
 }
-const ScrollWithBusItems = ({busStopWithBusesInfo, contentPaddingBottom}: ScrollWithBusItemsProps) => {
+const ScrollWithBusItems = ({busStopWithBusesInfo, contentPaddingBottom, filterMode = 'all'}: ScrollWithBusItemsProps) => {
     const busStopCode = busStopWithBusesInfo.busStopCode;
-    const sortedServices = [...busStopWithBusesInfo.services].sort((a, b) => {
+    const filteredServices = filterMode === 'double'
+        ? busStopWithBusesInfo.services.filter((service) => service.nextBus?.type === 'DD')
+        : busStopWithBusesInfo.services;
+    const sortedServices = [...filteredServices].sort((a, b) => {
         const aEta = a.nextBus?.countDown ?? Number.POSITIVE_INFINITY;
         const bEta = b.nextBus?.countDown ?? Number.POSITIVE_INFINITY;
         return aEta - bEta;

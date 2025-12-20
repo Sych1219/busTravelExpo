@@ -52,7 +52,7 @@ export default function App() {
         //
         // </View>
         <NavigationContainer>
-            <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName={'BusTravelOnTimeBar'}>
+            <Tab.Navigator screenOptions={{headerShown: false}} initialRouteName={'NearbyScreen'}>
                 <Tab.Screen name="NearbyScreen" component={NearbyScreen} options={{
                     title: 'Nearby',
                     headerShown: false,
@@ -126,4 +126,3 @@ export default function App() {
 
     );
 }
-

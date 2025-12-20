@@ -1,7 +1,7 @@
 import {Dimensions, Text, TouchableOpacity, View} from "react-native";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useEffect, useState} from "react";
-import {Route, SceneMap, TabView} from "react-native-tab-view";
+import {Route, TabView} from "react-native-tab-view";
 import {BusStopWithBusesInfoProps, RouteProps} from "../screens/NearbyScreen";
 import axios from "axios";
 import ScrollWithBusItems from "@components/ScrollWithBusItems";
@@ -12,13 +12,14 @@ import {useNavigation} from "@react-navigation/native";
 
 // Define your initial state for the tab index and routes
 const initialLayout = {width: Dimensions.get('window').width};
+type FilterMode = 'all' | 'double';
 const CustomerTabView = () => {
     const [busStops, setBusStops] = useState<BusStopWithBusesInfoProps[]>([]);
     const [routes, setRoutes] = useState<Route[]>([]);
-    const [sceneMapProps, setSceneMapProps] = useState<{ [key: string]: React.ComponentType }>({});
 
     const [index, setIndex] = useState(0);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [filterMode, setFilterMode] = useState<FilterMode>('all');
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
     const dockContentPadding = 24 + insets.bottom;
@@ -54,15 +55,6 @@ const CustomerTabView = () => {
                     title: busStop.busStopDescription
                 }));
                 setRoutes(routesInitial);
-                const tempSceneMapProps: { [key: string]: React.ComponentType } = {};
-                busStopsTemp.forEach((busStopWithBusesInfo, index) => {
-                    tempSceneMapProps[index.toString()] = (() => (
-                        <ScrollWithBusItems
-                            busStopWithBusesInfo={busStopWithBusesInfo}
-                            contentPaddingBottom={dockContentPadding}
-                        />));
-                });
-                setSceneMapProps(tempSceneMapProps);
             });
 
             return {latitude, longitude};
@@ -87,7 +79,7 @@ const CustomerTabView = () => {
     };
 
     return (
-        routes?.length > 0 && sceneMapProps && Object.keys(sceneMapProps).length > 0 ?
+        routes?.length > 0 ?
             <View className="flex-1 bg-slate-50">
                 <View className="absolute -top-24 -right-12 w-64 h-64 rounded-full bg-amber-100 opacity-70"/>
                 <View className="absolute top-24 -left-16 w-56 h-56 rounded-full bg-emerald-100 opacity-50"/>
@@ -107,8 +99,13 @@ const CustomerTabView = () => {
                             >
                                 <Text className="text-xs font-semibold text-slate-700">Search</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity className="rounded-full bg-white px-3 py-2">
-                                <Text className="text-xs font-semibold text-slate-700">Filter</Text>
+                            <TouchableOpacity
+                                className="rounded-full bg-white px-3 py-2"
+                                onPress={() => setFilterMode((current) => current === 'all' ? 'double' : 'all')}
+                            >
+                                <Text className="text-xs font-semibold text-slate-700">
+                                    Filter: {filterMode === 'all' ? 'All' : 'Double Deck'}
+                                </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 className="rounded-full bg-slate-900 px-3 py-2"
@@ -143,7 +140,24 @@ const CustomerTabView = () => {
                 <View className="flex-1">
                     <TabView
                         navigationState={{index, routes}}
-                        renderScene={SceneMap(sceneMapProps)}
+                        renderScene={({route}) => {
+                            const routeIndex = Number(route.key);
+                            const busStopWithBusesInfo = busStops[routeIndex];
+                            if (!busStopWithBusesInfo) {
+                                return (
+                                    <View className="flex-1 items-center justify-center">
+                                        <Text className="text-base text-slate-500">Loading...</Text>
+                                    </View>
+                                );
+                            }
+                            return (
+                                <ScrollWithBusItems
+                                    busStopWithBusesInfo={busStopWithBusesInfo}
+                                    contentPaddingBottom={dockContentPadding}
+                                    filterMode={filterMode}
+                                />
+                            );
+                        }}
                         onIndexChange={handleIndexChange}
                         initialLayout={initialLayout}
                         renderTabBar={() => null}

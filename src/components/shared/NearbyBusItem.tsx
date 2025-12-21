@@ -194,7 +194,6 @@ const NearbyBusItem = ({
                     </View>
 
                     <Text className="mt-2 text-xs text-slate-500">{tagLine()}</Text>
-                    <Text className="mt-2 text-xs text-slate-500">ETA: {formatEta(nextBus?.countDown ?? null)}</Text>
                     <Text className="mt-1 text-xs text-slate-500">
                         Next: {getNextLine()}
                     </Text>

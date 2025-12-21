@@ -1,4 +1,4 @@
-import {Modal, Pressable, Text, TouchableOpacity, View} from "react-native";
+import {Image, Modal, Pressable, Text, TouchableOpacity, View} from "react-native";
 import {useState} from "react";
 import axios, {AxiosRequestConfig} from "axios";
 import {busServiceUrl, clickOnFavouriteBus} from "@utils/UrlsUtil";
@@ -170,8 +170,12 @@ const NearbyBusItem = ({
                             <Text className="text-2xl font-extrabold text-slate-900">{serviceNo}</Text>
                             <View className="flex-row items-center space-x-2">
                                 {isWheelChairAccessible && (
-                                    <View className="rounded-full bg-emerald-100 px-2 py-0.5">
-                                        <Text className="text-xs font-semibold text-emerald-800">WAB</Text>
+                                    <View>
+                                        <Image
+                                            source={require('../../assets/wheelchair.jpg')}
+                                            className="h-4 w-4"
+                                            resizeMode="contain"
+                                        />
                                     </View>
                                 )}
                                 {nextBus.type === 'DD' && (

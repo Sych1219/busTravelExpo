@@ -162,6 +162,7 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
         if (location != null && destinationPlaceId != null && destinationPlaceId.length > 0) {
             const origin = location.latitude + "," + location.longitude;
             const destination = "place_id:" + destinationPlaceId;
+            console.log("origin and destination", origin, destination);
             axios.get<Route[]>(routesUrl, {params: {origin: origin, destination: destination}}).then((response) => {
                 const routes = response.data;
                 console.log("routes length", routes.length);

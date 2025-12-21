@@ -36,7 +36,7 @@ const FavouriteScreen = () => {
         const params: BusArrivingRequestParams = {
             longitude: 103.9004605,
             latitude: 1.4037280,
-            deviceId: 1,
+            deviceId: 666,
         }
         const config: AxiosRequestConfig = {
             params: params,

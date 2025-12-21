@@ -44,9 +44,9 @@ const NearbyBusItem = ({
                            busStopCode, service, variant = 'default'
                        }: NearbyBusItemProps) => {
 
-    let deviceId: string = Constants.deviceId;
+    let deviceId: number = Constants.deviceId;
     if (!deviceId) {
-        deviceId = "test"
+        deviceId = 666;
     }
 
     const [serviceInside, setServiceInside] = useState<Service>(service);
@@ -111,6 +111,7 @@ const NearbyBusItem = ({
     };
 
     const updateBusService = (busStopCode: string, busCode: string) => {
+        console.log("updateBusService", busStopCode, busCode)
         setIsRefreshing(true);
         const params: BusServiceParams = {
             busStopCode: busStopCode,
@@ -126,7 +127,7 @@ const NearbyBusItem = ({
             longitude: location?.longitude ?? 0,
             latitude: location?.latitude ?? 0,
         }
-
+        console.log("parmas2", parmas2)
         //here also need to call the be for faviourite bus
         axios.get(clickOnFavouriteBus, {params:parmas2}).then((response) => {
             console.log("click for faviourite", response.data)

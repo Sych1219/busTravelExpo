@@ -196,7 +196,7 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
                         <View key={indexLeg}>
                             <TouchableOpacity className={'w-full flex-row px-4 py-2'}
                                               onPress={() =>
-                                                  navigation.navigate('ListWalkAndStopsView', leg)
+                                                  navigation.navigate('RouteView', leg)
                                               }>
                                 {/*//todo if the let.steps size >=3, then show the first 1 step, and the last step*/}
                                 {leg.steps.map((step, indexStep) => (

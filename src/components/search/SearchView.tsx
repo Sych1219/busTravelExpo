@@ -10,13 +10,15 @@ const SearchView = () => {
     const navigation = useNavigation<NativeStackNavigationProp<StackParamList, 'SearchView'>>();
     const placesRef = useRef<GooglePlacesAutocompleteRef>(null);
     const [recentPlaces, setRecentPlaces] = useState<Array<{description: string; placeId: string}>>([]);
+    const [isResolvingPopular, setIsResolvingPopular] = useState(false);
 
+    type PopularSuggestion = {label: string; query: string; placeId?: string};
     const popularSuggestions = useMemo(
-        () => [
-            {label: "Changi Airport", query: "Changi Airport"},
-            {label: "Orchard Road", query: "Orchard Road"},
-            {label: "Bugis", query: "Bugis"},
-            {label: "Marina Bay Sands", query: "Marina Bay Sands"},
+        (): PopularSuggestion[] => [
+            {label: "Changi Airport", query: "Changi Airport", placeId: "ChIJ483Qk9YX2jERA0VOQV7d1tY"},
+            {label: "Orchard Road", query: "Orchard Road", placeId: "ChIJu_7mSJEZ2jER-vT-Nz_3mY4"},
+            {label: "Bugis", query: "Bugis", placeId: "ChIJj7TW9LoZ2jERQgNlXkKhASQ"},
+            {label: "Marina Bay Sands", query: "Marina Bay Sands", placeId: "ChIJA5LATO4Z2jER111V-v6abAI"},
         ],
         []
     );
@@ -28,6 +30,27 @@ const SearchView = () => {
             return [{description, placeId}, ...withoutDup].slice(0, 6);
         });
         navigation.navigate('RouteResultsView', {destinationPlaceId: placeId, destinationDescription: description});
+    };
+
+    const resolvePlaceIdFromText = async (text: string) => {
+        const url =
+            `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
+            `?input=${encodeURIComponent(text)}` +
+            `&inputtype=textquery` +
+            `&fields=place_id,formatted_address,name` +
+            `&language=en` +
+            `&components=country:sg` +
+            `&key=${encodeURIComponent(GOOGLE_API_KEY)}`;
+
+        const response = await fetch(url);
+        const json = await response.json();
+        const candidate = json?.candidates?.[0];
+        const placeId = (candidate?.place_id as string | undefined) ?? "";
+        const description =
+            (candidate?.formatted_address as string | undefined) ??
+            (candidate?.name as string | undefined) ??
+            text;
+        return placeId.length > 0 ? {placeId, description} : null;
     };
     return (
 
@@ -103,8 +126,27 @@ const SearchView = () => {
                                         <TouchableOpacity
                                             key={item.label}
                                             className={'mr-2 mb-2 rounded-full bg-white px-4 py-2 border border-slate-200'}
-                                            onPress={() => {
+                                            disabled={isResolvingPopular}
+                                            onPress={async () => {
                                                 placesRef.current?.setAddressText(item.query);
+                                                if (item.placeId && item.placeId.length > 0) {
+                                                    onDestinationSelected(item.label, item.placeId);
+                                                    return;
+                                                }
+                                                try {
+                                                    setIsResolvingPopular(true);
+                                                    const resolved = await resolvePlaceIdFromText(item.query);
+                                                    if (resolved) {
+                                                        onDestinationSelected(resolved.description, resolved.placeId);
+                                                    } else {
+                                                        placesRef.current?.focus();
+                                                    }
+                                                } catch (e) {
+                                                    console.log("resolvePlaceIdFromText error:", e);
+                                                    placesRef.current?.focus();
+                                                } finally {
+                                                    setIsResolvingPopular(false);
+                                                }
                                             }}
                                         >
                                             <Text className={'text-xs font-semibold text-slate-700'}>{item.label}</Text>

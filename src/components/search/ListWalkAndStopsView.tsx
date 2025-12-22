@@ -1,7 +1,6 @@
 import {View, Text, FlatList, TouchableOpacity, ScrollView} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
-import {StackParamList} from "../../screens/SearchScreen";
-import {LatLng, TextValue} from "@components/search/BusRoutes";
+import {LatLng, Leg, TextValue} from "@components/search/BusRoutes";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {busRoutesByStopNameUrl} from "@utils/UrlsUtil";
@@ -10,7 +9,11 @@ import {NextBus} from "@components/shared/NearbyBusItem";
 import TwoPointsWithCurve from "@components/search/TwoPointsWithCurve";
 
 
-type RouteViewProp = RouteProp<StackParamList, 'ListWalkAndStopsView'>;
+type ListWalkAndStopsParamList = {
+    ListWalkAndStopsView: Leg;
+};
+
+type RouteViewProp = RouteProp<ListWalkAndStopsParamList, 'ListWalkAndStopsView'>;
 
 interface StartAndEndStopInfo {
     departureStop: string;

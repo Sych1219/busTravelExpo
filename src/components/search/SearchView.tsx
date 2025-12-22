@@ -1,100 +1,50 @@
-import {View, Text, SafeAreaView, TextInput, Button, StyleSheet, FlatList, TouchableOpacity} from "react-native";
+import {View, Text, SafeAreaView, TouchableOpacity, ScrollView} from "react-native";
 import {GOOGLE_API_KEY} from "@utils/Keys";
 import {GooglePlacesAutocomplete, GooglePlacesAutocompleteRef} from "react-native-google-places-autocomplete";
-import BusRoutes from "@components/search/BusRoutes";
-import {useRef, useState} from "react";
-import BusAnimation from "@components/search/BusAnimation";
-import TwoPointsWithCurve from "@components/search/TwoPointsWithCurve";
-import {BusServiceNoAndBusRouteVOs, BusStopVO} from "@components/search/ListWalkAndStopsView";
-import TestAnimationRestart from "@components/search/TestAnimationRestart";
-import TestHookAndInterval from "@components/search/TestHookAndInterval";
+import {useMemo, useRef, useState} from "react";
+import {useNavigation} from "@react-navigation/native";
+import {NativeStackNavigationProp} from "@react-navigation/native-stack";
+import {StackParamList} from "../../screens/SearchScreen";
 
 const SearchView = () => {
-    const [placeId, setPlaceId] = useState<string>("");
-    //mock data of BusServiceNoAndBusRouteVOs
-    const busStopVO1: BusStopVO = {
-        distanceToUser: 1,
-        busStopCode: "65221",
-        roadName: "roadName",
-        description: "block 271a Bef Tampines Ave 5",
-        latitude: 1.1,
-        longitude: 1.1,
-    }
-    const busServiceNoAndBusRouteVOs: BusServiceNoAndBusRouteVOs = {
-        serviceNo: "123",
-        busRouteVOs: [{
-            id: "1",
-            serviceNo: "34",
-            operator: "SBST",
-            direction: 1,
-            stopSequence: 1,
-            busStopCode: "65009",
-            busStopVO: busStopVO1,
-            distance: 1,
-            wdFirstBus: "2021-08-01T20:00:00+08:00",
-            wdLastBus: "2021-08-01T20:00:00+08:00",
-            satFirstBus: "2021-08-01T20:00:00+08:00",
-            satLastBus: "2021-08-01T20:00:00+08:00",
-            sunFirstBus: "2021-08-01T20:00:00+08:00",
-            sunLastBus: "2021-08-01T20:00:00+08:00",
-        }, {
-            id: "1",
-            serviceNo: "34",
-            operator: "SBST",
-            direction: 1,
-            stopSequence: 1,
-            busStopCode: "65089",
-            busStopVO: busStopVO1,
-            distance: 1,
-            wdFirstBus: "2021-08-01T20:00:00+08:00",
-            wdLastBus: "2021-08-01T20:00:00+08:00",
-            satFirstBus: "2021-08-01T20:00:00+08:00",
-            satLastBus: "2021-08-01T20:00:00+08:00",
-            sunFirstBus: "2021-08-01T20:00:00+08:00",
-            sunLastBus: "2021-08-01T20:00:00+08:00",
-        }, {
-            id: "1",
-            serviceNo: "34",
-            operator: "SBST",
-            direction: 1,
-            stopSequence: 1,
-            busStopCode: "65079",
-            busStopVO: busStopVO1,
-            distance: 1,
-            wdFirstBus: "2021-08-01T20:00:00+08:00",
-            wdLastBus: "2021-08-01T20:00:00+08:00",
-            satFirstBus: "2021-08-01T20:00:00+08:00",
-            satLastBus: "2021-08-01T20:00:00+08:00",
-            sunFirstBus: "2021-08-01T20:00:00+08:00",
-            sunLastBus: "2021-08-01T20:00:00+08:00",
-        }],
-        busArrivingInfo: {
-            nextBus: {
-                estimatedArrival: "2021-08-01T20:00:00+08:00",
-                latitude: "1.1",
-                longitude: "1.1",
-                visitNumber: "1",
-                load: "SEA",
-                feature: "WAB",
-                type: "SD",
-                countDown: 50,
-                originCode: "1",
-                destinationCode: "2",
-            },
-            operator: "SBST",
-            serviceNo: "34",
-            toArriveBusStopCode: "65009",
-        }
-    }
+    const navigation = useNavigation<NativeStackNavigationProp<StackParamList, 'SearchView'>>();
+    const placesRef = useRef<GooglePlacesAutocompleteRef>(null);
+    const [recentPlaces, setRecentPlaces] = useState<Array<{description: string; placeId: string}>>([]);
+
+    const popularSuggestions = useMemo(
+        () => [
+            {label: "Changi Airport", query: "Changi Airport"},
+            {label: "Orchard Road", query: "Orchard Road"},
+            {label: "Bugis", query: "Bugis"},
+            {label: "Marina Bay Sands", query: "Marina Bay Sands"},
+        ],
+        []
+    );
+
+    const onDestinationSelected = (description: string, placeId: string) => {
+        if (!placeId) return;
+        setRecentPlaces((prev) => {
+            const withoutDup = prev.filter((p) => p.placeId !== placeId);
+            return [{description, placeId}, ...withoutDup].slice(0, 6);
+        });
+        navigation.navigate('RouteResultsView', {destinationPlaceId: placeId, destinationDescription: description});
+    };
     return (
 
-        <SafeAreaView className={'w-full h-full flex-col justify-between'}>
-            <View className={'w-full h-1/2'}>
+        <SafeAreaView className={'w-full h-full bg-slate-50'}>
+            <ScrollView contentContainerStyle={{paddingBottom: 24}}>
+            <View className={'px-6 pt-4'}>
+                <Text className={'text-3xl font-extrabold text-slate-900'}>Where to?</Text>
+                <Text className={'mt-1 text-sm text-slate-500'}>Search a destination to see routes</Text>
+            </View>
+
+            <View className={'mt-4'}>
                 <GooglePlacesAutocomplete
+                    ref={placesRef}
                     styles={{
                         container: {
                             // paddingTop: 45,
-                            paddingHorizontal: 32, // Add desired horizontal padding
+                            paddingHorizontal: 24,
                         },
                         textInputContainer: {
                             backgroundColor: 'white',
@@ -104,10 +54,10 @@ const SearchView = () => {
                     }}
                     placeholder="search here"
                     onPress={(data, details) => {
-                        // Handle selected place
-                        if (data.place_id && data.place_id.length > 0) {
-                            console.log("place id is set:", data.place_id);
-                            setPlaceId(data.place_id);
+                        const placeId = data.place_id ?? "";
+                        const description = (data.description as string) ?? "Destination";
+                        if (placeId.length > 0) {
+                            onDestinationSelected(description, placeId);
                         }
                     }}
                     fetchDetails
@@ -119,14 +69,47 @@ const SearchView = () => {
                 />
             </View>
 
-            <BusRoutes destinationPlaceId={placeId}/>
-            {/*<BusAnimation/>*/}
-            {/*<TwoPointsWithCurve busRouteVOs={busServiceNoAndBusRouteVOs.busRouteVOs}*/}
-            {/*                    busArrivingInfo={busServiceNoAndBusRouteVOs.busArrivingInfo}*/}
-            {/*                    serviceNo={busServiceNoAndBusRouteVOs.serviceNo}/>*/}
-            {/*<TestHookAndInterval/>*/}
-            {/*<TestAnimationRestart/>*/}
+            <View className={'mt-6 px-6'}>
+                <Text className={'text-base font-bold text-slate-900'}>Recommended</Text>
 
+                {recentPlaces.length > 0 && (
+                    <View className={'mt-3'}>
+                        <Text className={'text-xs font-semibold text-slate-500'}>Recent</Text>
+                        <View className={'mt-2 space-y-2'}>
+                            {recentPlaces.map((p) => (
+                                <TouchableOpacity
+                                    key={p.placeId}
+                                    className={'rounded-xl bg-white px-4 py-3 border border-slate-200'}
+                                    onPress={() => onDestinationSelected(p.description, p.placeId)}
+                                >
+                                    <Text className={'text-sm font-semibold text-slate-900'} numberOfLines={1}>
+                                        {p.description}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                <View className={'mt-4'}>
+                    <Text className={'text-xs font-semibold text-slate-500'}>Popular</Text>
+                    <View className={'mt-2 flex-row flex-wrap'}>
+                        {popularSuggestions.map((item) => (
+                            <TouchableOpacity
+                                key={item.label}
+                                className={'mr-2 mb-2 rounded-full bg-white px-4 py-2 border border-slate-200'}
+                                onPress={() => {
+                                    placesRef.current?.setAddressText(item.query);
+                                }}
+                            >
+                                <Text className={'text-xs font-semibold text-slate-700'}>{item.label}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+            </View>
+
+            </ScrollView>
         </SafeAreaView>
 
 

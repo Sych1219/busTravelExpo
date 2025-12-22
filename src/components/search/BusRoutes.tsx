@@ -8,6 +8,7 @@ import StepItem from "@components/search/StepItem";
 import {useNavigation} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
+import {mergeLegs} from "@components/search/routeUtils";
 
 interface BusRoutesProps {
     destinationPlaceId: string;
@@ -166,8 +167,10 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
             axios.get<Route[]>(routesUrl, {params: {origin: origin, destination: destination}}).then((response) => {
                 const routes = response.data;
                 console.log("routes length", routes.length);
-                //from the routes, get the legs
-                const legs = routes.map((route) => route.legs).flat();
+                // Keep each Route as a single UI option by merging its legs; within a route we still "connect" transit by flattening steps.
+                const legs = routes
+                    .map((route) => mergeLegs(route.legs))
+                    .filter((leg): leg is Leg => leg != null);
                 const startEndStopServiceNos1: StartEndStopServiceNo[] = legs.map((leg) => {
                     return mapLegToStartEndStopServiceNo(leg);
                 });

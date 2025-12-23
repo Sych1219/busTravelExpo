@@ -76,10 +76,10 @@ Implementation options (already in deps):
 - or `react-native-tab-view` (used in Nearby) with tabs hidden and swipe enabled
 
 ### Layout (recommended)
-- **Top 60%**: Map (react-native-maps)
+- **Top 40%**: Map (react-native-maps)
   - polylines for steps (bus vs walk colors)
   - bus-stop dots (markers)
-- **Bottom 40%**: Route option card
+- **Bottom 60%**: Route option card
   - option title + recommendation badge (e.g., `OPTION 1` + ⭐)
   - compact walk → bus summary line
   - next-bus info + from/to stop names

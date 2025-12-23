@@ -1,4 +1,4 @@
-import {View, Text, ActivityIndicator} from "react-native";
+import {View, Text, ActivityIndicator, ScrollView} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
@@ -277,7 +277,7 @@ const RouteResultsView = () => {
 
     return (
         <View className={'flex-1 bg-slate-50'}>
-            <View className={'flex-1'}>
+            <View style={{flex: 0.4}}>
                 {mapRegion && (
                     <MapView style={{flex: 1}} initialRegion={mapRegion}>
                         {stepPolylines.map((seg) => (
@@ -324,10 +324,7 @@ const RouteResultsView = () => {
                 )}
             </View>
 
-            <View className={'h-80 bg-white border-t border-slate-200 rounded-t-3xl'}>
-                <View className={'items-center pt-2'}>
-                    <View className={'h-1 w-12 rounded-full bg-slate-200'} />
-                </View>
+            <View className={'bg-white border-t border-slate-200 rounded-t-3xl p-4'} style={{flex: 0.6}}>
                 <PagerView
                     style={{flex: 1}}
                     initialPage={0}
@@ -344,7 +341,7 @@ const RouteResultsView = () => {
                     const mockBusStopCode = selectedStop?.busStopCode ?? primaryStopCode ?? '--';
 
                     return (
-                        <View key={index} className={'px-5 pb-4'}>
+                        <ScrollView key={index} className={'px-5 pb-4'}>
                             <NearbyBusItem
                                 busStopCode={mockBusStopCode}
                                 service={mockService}
@@ -372,7 +369,7 @@ const RouteResultsView = () => {
                                     Total time: {leg.duration?.text ?? '--'}
                                 </Text>
                             </View>
-                        </View>
+                        </ScrollView>
                     );
                 })}
                 </PagerView>

@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator} from "react-native";
+import {View, Text, TouchableOpacity, ActivityIndicator} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
@@ -30,18 +30,6 @@ const decodeStepPolyline = (step: Step) => {
     return decoded.map(([latitude, longitude]) => ({latitude, longitude}));
 };
 
-const countTransfers = (leg: Leg) => {
-    const transitSegments = leg.steps.filter((s) => s.travelMode === 'transit');
-    return Math.max(0, transitSegments.length - 1);
-};
-
-const sumWalk = (leg: Leg) => {
-    const walkingSteps = leg.steps.filter((s) => s.travelMode === 'walking');
-    const walkSeconds = walkingSteps.reduce((sum, s) => sum + (s?.duration?.value ?? 0), 0);
-    const walkMeters = walkingSteps.reduce((sum, s) => sum + (s?.distance?.value ?? 0), 0);
-    return {walkSeconds, walkMeters};
-};
-
 const RouteResultsView = () => {
     const route = useRoute<RouteResultsRouteProp>();
     const {destinationPlaceId, destinationDescription} = route.params;
@@ -55,7 +43,9 @@ const RouteResultsView = () => {
 
     const [stopMarkers, setStopMarkers] = useState<StopMarker[]>([]);
     const [primaryEtaSeconds, setPrimaryEtaSeconds] = useState<number | null>(null);
-    const [primaryEtaLabel, setPrimaryEtaLabel] = useState<string>("");
+    const [primaryStopName, setPrimaryStopName] = useState<string>("");
+    const [primaryBusCode, setPrimaryBusCode] = useState<string>("");
+    const [primaryStopsCount, setPrimaryStopsCount] = useState<number | null>(null);
     const [selectedStop, setSelectedStop] = useState<StopMarker | null>(null);
     const [selectedEtaSeconds, setSelectedEtaSeconds] = useState<number | null>(null);
 
@@ -108,7 +98,9 @@ const RouteResultsView = () => {
     useEffect(() => {
         setStopMarkers([]);
         setPrimaryEtaSeconds(null);
-        setPrimaryEtaLabel("");
+        setPrimaryStopName("");
+        setPrimaryBusCode("");
+        setPrimaryStopsCount(null);
         setSelectedStop(null);
         setSelectedEtaSeconds(null);
 
@@ -152,7 +144,9 @@ const RouteResultsView = () => {
                 const boarding = firstSegment[0];
                 const firstTransit = transitSteps[0];
                 if (boarding?.busStopCode && firstTransit?.busCode) {
-                    setPrimaryEtaLabel(`Next bus (${firstTransit.busCode}) @ ${boarding.busStopVO?.description ?? boarding.busStopCode}`);
+                    setPrimaryStopName(boarding.busStopVO?.description ?? boarding.busStopCode ?? '');
+                    setPrimaryBusCode(firstTransit.busCode);
+                    setPrimaryStopsCount(firstTransit.numStops ?? null);
                     const etaResp = await axios.get<Service>(busServiceUrl, {
                         params: {busStopCode: boarding.busStopCode, busCode: firstTransit.busCode},
                     });
@@ -202,6 +196,18 @@ const RouteResultsView = () => {
     const formatEta = (seconds: number | null) => {
         if (seconds == null) return 'Arr';
         return formatCountdown(seconds);
+    };
+
+    const getFirstWalkLabel = (leg: Leg) => {
+        const walk = leg.steps.find((s) => s.travelMode === 'walking');
+        return walk?.distance?.text ?? '0 m';
+    };
+
+    const getFirstTransit = (leg: Leg) => leg.steps.find((s) => s.travelMode === 'transit');
+
+    const getDestinationLabel = (leg: Leg) => {
+        const lastStep = leg.steps[leg.steps.length - 1];
+        return lastStep?.arrivalStop ?? destinationDescription ?? 'Destination';
     };
 
     const fetchSelectedEta = async (stop: StopMarker) => {
@@ -317,52 +323,73 @@ const RouteResultsView = () => {
                     initialPage={0}
                     onPageSelected={(e) => setActiveIndex(e.nativeEvent.position)}
                 >
-                    {options.map((leg, index) => {
-                        const transfers = countTransfers(leg);
-                        const {walkSeconds, walkMeters} = sumWalk(leg);
-                        const walkMins = Math.round(walkSeconds / 60);
+                {options.map((leg, index) => {
+                        const firstTransit = getFirstTransit(leg);
+                        const walkLabel = getFirstWalkLabel(leg);
+                        const destinationLabel = getDestinationLabel(leg);
+                        const stopsCount = firstTransit?.numStops ?? primaryStopsCount;
+                        const busCode = firstTransit?.busCode ?? primaryBusCode;
 
                         return (
                             <View key={index} className={'px-5 pb-4'}>
-                                <Text className={'text-base font-extrabold text-slate-900'} numberOfLines={1}>
-                                    {leg.duration.text} · {transfers} transfer{transfers === 1 ? '' : 's'} · ~{walkMins} mins walk
-                                </Text>
-                                <Text className={'mt-1 text-xs text-slate-500'} numberOfLines={1}>
-                                    {destinationDescription ?? 'Destination'} · Walk {walkMeters < 1000 ? `${Math.round(walkMeters)} m` : `${(walkMeters / 1000).toFixed(1)} km`}
-                                </Text>
+                                <View className={'rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
+                                    <View className={'flex-row items-center justify-between'}>
+                                        <Text className={'text-xs font-semibold text-slate-600'} numberOfLines={1}>
+                                            Walk {walkLabel}
+                                        </Text>
+                                        <Text className={'text-xs font-semibold text-slate-600'} numberOfLines={1}>
+                                            Bus {busCode ?? '--'} {stopsCount != null ? `(${stopsCount})` : ''}
+                                        </Text>
+                                        <Text className={'text-xs font-semibold text-slate-600'} numberOfLines={1}>
+                                            To {destinationLabel}
+                                        </Text>
+                                    </View>
+
+                                    <View className={'mt-3 flex-row items-center'}>
+                                        <View className={'flex-1 h-0.5 bg-slate-300'} />
+                                        <View className={'h-2 w-2 rounded-full bg-slate-900'} />
+                                        <View className={'flex-1 h-0.5 bg-slate-300'} />
+                                        <View className={'h-2 w-2 rounded-full bg-slate-900'} />
+                                        <View className={'flex-1 h-0.5 bg-slate-300'} />
+                                        <View className={'h-2 w-2 rounded-full bg-slate-900'} />
+                                        <View className={'flex-1 h-0.5 bg-slate-300'} />
+                                    </View>
+
+                                    <View className={'mt-2 flex-row items-center justify-between'}>
+                                        <Text className={'text-[10px] text-slate-500'} numberOfLines={1}>
+                                            {primaryStopName || firstTransit?.departureStop || 'Stop'}
+                                        </Text>
+                                        <Text className={'text-[10px] text-slate-500'}>Ride</Text>
+                                        <Text className={'text-[10px] text-slate-500'} numberOfLines={1}>
+                                            {destinationLabel}
+                                        </Text>
+                                    </View>
+                                </View>
 
                                 {index === activeIndex && (
-                                    <View className={'mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3'}>
-                                        <Text className={'text-xs font-semibold text-slate-700'} numberOfLines={2}>
-                                            {primaryEtaLabel.length > 0 ? primaryEtaLabel : 'Next bus'}
-                                        </Text>
-                                        <Text className={'mt-1 text-2xl font-extrabold text-slate-900'}>
-                                            {formatEta(primaryEtaSeconds)}
-                                        </Text>
-                                        {selectedStop && (
-                                            <Text className={'mt-2 text-xs text-slate-600'} numberOfLines={2}>
-                                                Selected: {selectedStop.description} ({selectedStop.busStopCode}) · Bus {selectedStop.serviceNo}:{' '}
-                                                {formatEta(selectedEtaSeconds)}
-                                            </Text>
-                                        )}
-                                    </View>
-                                )}
-
-                                <ScrollView className={'mt-4'}>
-                                    {leg.steps.map((step, i) => (
-                                        <View key={i} className={'mb-3'}>
-                                            {step.travelMode === 'walking' ? (
-                                                <Text className={'text-sm text-slate-800'}>
-                                                    Walk · {step.distance.text} · {step.duration.text}
+                                    <>
+                                        <View className={'mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3'}>
+                                            <View className={'flex-row items-center justify-between'}>
+                                                <Text className={'text-xs font-semibold text-slate-700'} numberOfLines={1}>
+                                                    Next: {formatEta(primaryEtaSeconds)}
                                                 </Text>
-                                            ) : (
-                                                <Text className={'text-sm text-slate-800'} numberOfLines={2}>
-                                                    Bus {step.busCode} · {step.numStops} stops · {step.departureStop} → {step.arrivalStop}
+                                                <Text className={'text-xs text-slate-600'} numberOfLines={1}>
+                                                    Stop: {primaryStopName || firstTransit?.departureStop || 'Boarding'}
+                                                </Text>
+                                            </View>
+                                            {selectedStop && (
+                                                <Text className={'mt-2 text-xs text-slate-600'} numberOfLines={2}>
+                                                    Selected: {selectedStop.description} ({selectedStop.busStopCode}) · Bus {selectedStop.serviceNo}:{' '}
+                                                    {formatEta(selectedEtaSeconds)}
                                                 </Text>
                                             )}
                                         </View>
-                                    ))}
-                                </ScrollView>
+
+                                        <TouchableOpacity className={'mt-3 rounded-full bg-slate-900 py-3'} onPress={() => {}}>
+                                            <Text className={'text-center text-sm font-bold text-white'}>START NAV</Text>
+                                        </TouchableOpacity>
+                                    </>
+                                )}
                             </View>
                         );
                     })}
@@ -373,4 +400,3 @@ const RouteResultsView = () => {
 };
 
 export default RouteResultsView;
-

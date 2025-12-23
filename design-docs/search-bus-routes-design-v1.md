@@ -103,13 +103,17 @@ Implementation options (already in deps):
 │              (Pager)        ●  ○  ○                │
 ├────────────────────────────────────────────────────┤
 │  ┌───────────────────────────────┐                │
+│  │  858   Tags: Accessible        │                │
+│  │  ETA: 2 min   Next: 10, 19 min │                │
+│  │  To:  Bef Changi PTB3          │                │
+│  │                               │                │
+│  │  [Notify]  [Save]  [Details]  │                │
+│  └───────────────────────────────┘                │
+│  ┌───────────────────────────────┐                │
 │  │  OPTION 1   ⭐ Recommended     │                │
 │  │                               │                │
 │  │  🚶 20m  →  🚌 858 (2 stops)   │                │
 │  │                               │                │
-│  │  NEXT BUS   2 MIN              │                │
-│  │  From:  Aft Punggol Rd         │                │
-│  │  To:    Bef Changi PTB3        │                │
 │  │  Total time:  24 mins          │                │
 │  └───────────────────────────────┘                │
 │     ○  ●  ○   (page dots)                          │
@@ -128,13 +132,12 @@ Implementation options (already in deps):
   - emphasized start/end/transfer stops (larger or outlined)
 - Tapping a stop dot opens a small callout with:
   - stop name/code
-  - “Next bus: X min” for the relevant service (see “Next bus block” section)
+  - “ETA: X min” for the relevant service (see “Next bus block” section)
 
 ### Route Option Card (bottom card)
 For the active route option (single, compact card):
 - Header: option index + optional ⭐ Recommended badge.
 - Summary row: `🚶 {walk distance}` → `🚌 {service} ({stops} stops)`.
-- Next bus block: `Next bus: {X min}`, `From: {boarding stop}`, `To: {arrival stop}`.
 - Keep the card tappable: tapping map stop dots should still highlight the relevant stop in context.
 
 ### Next bus block
@@ -143,6 +146,11 @@ V1 recommendation to keep it useful + cheap:
 - If user taps a stop dot, fetch and show ETA for that stop/service.
 
 Also show platform/bay when the backend provides it (otherwise omit).
+Recommended layout:
+- Line 1: `{service}   Tags: {Accessible/Low-floor/etc.}`
+- Line 2: `ETA: {X min}   Next: {Y min, Z min}`
+- Line 3: `To: {arrival stop}`
+- Line 4: `[Notify]  [Save]  [Details]` (optional actions)
 
 ### Primary CTA
 `START NAV` starts navigation mode (V1 can be “lightweight” — e.g., keep map centered + show the same strip and ETA updates).

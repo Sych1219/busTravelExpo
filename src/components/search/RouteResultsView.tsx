@@ -333,6 +333,21 @@ const RouteResultsView = () => {
                         <View key={index} className={'px-5 pb-4'}>
                             <View className={'rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
                                 <View className={'flex-row items-center justify-between'}>
+                                    <Text className={'text-xs font-bold text-amber-600'}>NEXT BUS</Text>
+                                    <Text className={'text-base font-extrabold text-slate-900'}>
+                                        {formatEta(primaryEtaSeconds)}
+                                    </Text>
+                                </View>
+                                <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
+                                    From: {primaryStopName || boardingLabel}
+                                </Text>
+                                <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
+                                    To: {arrivalLabel}
+                                </Text>
+                            </View>
+
+                            <View className={'mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
+                                <View className={'flex-row items-center justify-between'}>
                                     <Text className={'text-xs font-semibold text-slate-700'}>OPTION {index + 1}</Text>
                                     {isRecommended && (
                                         <Text className={'text-xs font-semibold text-amber-600'}>⭐ Recommended</Text>
@@ -347,17 +362,9 @@ const RouteResultsView = () => {
                                     </Text>
                                 </View>
 
-                                <View className={'mt-4'}>
-                                    <Text className={'text-xs font-semibold text-slate-700'}>
-                                        Next bus: {formatEta(primaryEtaSeconds)}
-                                    </Text>
-                                    <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
-                                        From: {primaryStopName || boardingLabel}
-                                    </Text>
-                                    <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
-                                        To: {arrivalLabel}
-                                    </Text>
-                                </View>
+                                <Text className={'mt-4 text-xs text-slate-500'} numberOfLines={1}>
+                                    Total time: {leg.duration?.text ?? '--'}
+                                </Text>
                             </View>
                         </View>
                     );

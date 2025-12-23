@@ -79,9 +79,10 @@ Implementation options (already in deps):
 - **Top 60%**: Map (react-native-maps)
   - polylines for steps (bus vs walk colors)
   - bus-stop dots (markers)
-- **Bottom 40%**: “Transit Line Strip” (compact bottom card)
-  - route as a single line with key nodes (start/boarding/ride/destination)
-  - one primary “next” row (ETA + platform/bay when available)
+- **Bottom 40%**: Route option card
+  - option title + recommendation badge (e.g., `OPTION 1` + ⭐)
+  - compact walk → bus summary line
+  - next-bus info + from/to stop names
   - primary CTA: `START NAV`
 
 ### Text Wireframe (Screen 2)
@@ -101,22 +102,17 @@ Implementation options (already in deps):
 │                                                    │
 │              (Pager)        ●  ○  ○                │
 ├────────────────────────────────────────────────────┤
-│  “Transit Line Strip” (below map)                  │
-│  (focus: route as a line, super compact)           │
-│                                                    │
-│  ┌────────────────────────────────────┐            │
-│  │  ⌄          Pattee TC          Westgate Bldg    │
-│  │  ◎ · 🚶 20m · 🚌 858 (2) · ◎ ─── ◎ ─── ◎ · 🏁    │
-│  │             1:12pm             1:16pm           │
-│  └────────────────────────────────────┘            │
-│  (Tap to expand details)                           │
-│  • 🚶 5 min walk to Lot 83                         │
-│  • 🚌 16 min ride to Westgate Bldg                 │
-│  • 🚶 2 min walk to Willard Bldg                   │
-│                                                    │
-│  ┌────────────────────────────────────┐            │
-│  │  Next: 2m      Platform: Aft Punggol│           │
-│  └────────────────────────────────────┘            │
+│  ┌───────────────────────────────┐                │
+│  │  OPTION 1   ⭐ Recommended     │                │
+│  │                               │                │
+│  │  🚶 20m  →  🚌 858 (2 stops)   │                │
+│  │                               │                │
+│  │  NEXT BUS   2 MIN              │                │
+│  │  From:  Aft Punggol Rd         │                │
+│  │  To:    Bef Changi PTB3        │                │
+│  │  Total time:  24 mins          │                │
+│  └───────────────────────────────┘                │
+│     ○  ●  ○   (page dots)                          │
 │                                                    │
 │  ┌────────────────────────────────────┐            │
 │  │          [ START NAV ]              │            │
@@ -132,21 +128,19 @@ Implementation options (already in deps):
   - emphasized start/end/transfer stops (larger or outlined)
 - Tapping a stop dot opens a small callout with:
   - stop name/code
-  - “Next bus: X min” for the relevant service (see “Next (ETA) row” section)
+  - “Next bus: X min” for the relevant service (see “Next bus block” section)
 
-### Transit Line Strip (bottom card)
-For the active route option (single, compact line):
-- Single inline timeline row: origin icon → walk icon + distance → bus icon + transit stop → stop nodes → destination flag (all icons in one line).
-- Above the line: transit stop names only (boarding/transfer/destination) on one row (e.g., `Pattee TC   Westgate Bldg`).
-- Below the line: times aligned with their stop labels (e.g., `1:12pm   1:16pm`).
-- Add a simple collapse/expand affordance (e.g., chevron ⌃/⌄) aligned with the top row; collapsed state can hide the labels/times if needed.
-- Keep the visual strip tappable: tapping a node highlights the corresponding stop dot on the map.
-- Show key labels only (e.g., boarding stop name, service number, destination/POI short code).
+### Route Option Card (bottom card)
+For the active route option (single, compact card):
+- Header: option index + optional ⭐ Recommended badge.
+- Summary row: `🚶 {walk distance}` → `🚌 {service} ({stops} stops)`.
+- Next bus block: `Next bus: {X min}`, `From: {boarding stop}`, `To: {arrival stop}`.
+- Keep the card tappable: tapping map stop dots should still highlight the relevant stop in context.
 
-### Next (ETA) row
+### Next bus block
 V1 recommendation to keep it useful + cheap:
 - Show **one primary countdown**: next bus for the route’s first upcoming transit segment (the first `travelMode === "transit"` step).
-- If user taps a stop dot / node, fetch and show ETA for that stop/service.
+- If user taps a stop dot, fetch and show ETA for that stop/service.
 
 Also show platform/bay when the backend provides it (otherwise omit).
 

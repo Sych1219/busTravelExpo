@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ActivityIndicator} from "react-native";
+import {View, Text, ActivityIndicator} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
@@ -47,8 +47,6 @@ const RouteResultsView = () => {
     const [primaryBusCode, setPrimaryBusCode] = useState<string>("");
     const [primaryStopsCount, setPrimaryStopsCount] = useState<number | null>(null);
     const [selectedStop, setSelectedStop] = useState<StopMarker | null>(null);
-    const [selectedEtaSeconds, setSelectedEtaSeconds] = useState<number | null>(null);
-    const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
     useEffect(() => {
         if (!destinationPlaceId || destinationPlaceId.length === 0) {
@@ -81,7 +79,6 @@ const RouteResultsView = () => {
                 setOptions(merged);
                 setActiveIndex(0);
                 setSelectedStop(null);
-                setSelectedEtaSeconds(null);
 
                 if (merged.length === 0) {
                     setState('empty');
@@ -103,7 +100,6 @@ const RouteResultsView = () => {
         setPrimaryBusCode("");
         setPrimaryStopsCount(null);
         setSelectedStop(null);
-        setSelectedEtaSeconds(null);
 
         if (!activeLeg) return;
 
@@ -161,9 +157,6 @@ const RouteResultsView = () => {
         void fetchStopsAndEta();
     }, [activeLeg]);
 
-    useEffect(() => {
-        setIsExpanded(false);
-    }, [activeIndex]);
 
     const stepPolylines = useMemo(() => {
         if (!activeLeg) return [];
@@ -210,16 +203,6 @@ const RouteResultsView = () => {
 
     const getFirstTransit = (leg: Leg) => leg.steps.find((s) => s.travelMode === 'transit');
 
-    const getDestinationLabel = (leg: Leg) => {
-        const lastStep = leg.steps[leg.steps.length - 1];
-        return lastStep?.arrivalStop ?? destinationDescription ?? 'Destination';
-    };
-
-    const getStartLabel = (leg: Leg) => {
-        const firstWalk = leg.steps.find((s) => s.travelMode === 'walking');
-        return firstWalk?.departureStop || leg.startAddress || 'Start';
-    };
-
     const getBoardingLabel = (leg: Leg) => {
         const transit = getFirstTransit(leg);
         return transit?.departureStop || 'Boarding';
@@ -230,27 +213,13 @@ const RouteResultsView = () => {
         return transit?.arrivalStop || destinationDescription || 'Destination';
     };
 
-    const getDurations = (leg: Leg) => {
-        const firstWalk = leg.steps.find((s) => s.travelMode === 'walking');
-        const transit = getFirstTransit(leg);
-        return {
-            walkDuration: firstWalk?.duration?.text ?? '--',
-            busDuration: transit?.duration?.text ?? '--',
-            totalDuration: leg.duration?.text ?? '--',
-        };
+    const getStopsLabel = (stopsCount: number | null | undefined) => {
+        if (stopsCount == null) return '';
+        return `(${stopsCount} stop${stopsCount === 1 ? '' : 's'})`;
     };
 
-    const fetchSelectedEta = async (stop: StopMarker) => {
-        try {
-            setSelectedStop(stop);
-            setSelectedEtaSeconds(null);
-            const etaResp = await axios.get<Service>(busServiceUrl, {
-                params: {busStopCode: stop.busStopCode, busCode: stop.serviceNo},
-            });
-            setSelectedEtaSeconds(etaResp.data?.nextBus?.countDown ?? null);
-        } catch (e) {
-            console.log("RouteResultsView selected ETA fetch error", e);
-        }
+    const selectStop = (stop: StopMarker) => {
+        setSelectedStop(stop);
     };
 
     if (state === 'loading') {
@@ -332,7 +301,7 @@ const RouteResultsView = () => {
                                         key={m.busStopCode}
                                         coordinate={{latitude: m.latitude, longitude: m.longitude}}
                                         title={m.description}
-                                        onPress={() => void fetchSelectedEta(m)}
+                                        onPress={() => selectStop(m)}
                                     >
                                         <View className={`h-3 w-3 rounded-full ${isSelected ? 'bg-emerald-600' : 'bg-slate-900'}`} />
                                     </Marker>
@@ -346,8 +315,6 @@ const RouteResultsView = () => {
                 <View className={'items-center pt-2'}>
                     <View className={'h-1 w-12 rounded-full bg-slate-200'} />
                 </View>
-                {renderDots(options.length, activeIndex)}
-
                 <PagerView
                     style={{flex: 1}}
                     initialPage={0}
@@ -356,107 +323,48 @@ const RouteResultsView = () => {
                 {options.map((leg, index) => {
                     const firstTransit = getFirstTransit(leg);
                     const walkLabel = getFirstWalkLabel(leg);
-                    const destinationLabel = getDestinationLabel(leg);
                     const stopsCount = firstTransit?.numStops ?? primaryStopsCount;
                     const busCode = firstTransit?.busCode ?? primaryBusCode;
-                    const startLabel = getStartLabel(leg);
                     const boardingLabel = getBoardingLabel(leg);
                     const arrivalLabel = getArrivalLabel(leg);
-                    const {walkDuration, busDuration, totalDuration} = getDurations(leg);
+                    const isRecommended = index === 0;
 
                     return (
                         <View key={index} className={'px-5 pb-4'}>
                             <View className={'rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
-                                <View className={'flex-row items-center'}>
-                                    <TouchableOpacity onPress={() => setIsExpanded((v) => !v)} className={'mr-2'}>
-                                        <Text className={'text-lg text-slate-700'}>{isExpanded ? '⌃' : '⌄'}</Text>
-                                    </TouchableOpacity>
-                                    <Text className={'flex-1 text-xs font-semibold text-slate-700'} numberOfLines={1}>
-                                        {startLabel}
-                                    </Text>
-                                    <Text className={'flex-1 text-xs font-semibold text-slate-700 text-center'} numberOfLines={1}>
-                                        {boardingLabel}
-                                    </Text>
-                                    <Text className={'flex-1 text-xs font-semibold text-slate-700 text-right'} numberOfLines={1}>
-                                        {arrivalLabel}
+                                <View className={'flex-row items-center justify-between'}>
+                                    <Text className={'text-xs font-semibold text-slate-700'}>OPTION {index + 1}</Text>
+                                    {isRecommended && (
+                                        <Text className={'text-xs font-semibold text-amber-600'}>⭐ Recommended</Text>
+                                    )}
+                                </View>
+
+                                <View className={'mt-3 flex-row items-center'}>
+                                    <Text className={'text-sm font-semibold text-slate-800'}>🚶 {walkLabel}</Text>
+                                    <Text className={'mx-2 text-sm text-slate-400'}>→</Text>
+                                    <Text className={'text-sm font-semibold text-slate-800'}>
+                                        🚌 {busCode ?? '--'} {getStopsLabel(stopsCount)}
                                     </Text>
                                 </View>
 
-                                <View className={'mt-2 flex-row items-center'}>
-                                    <Text className={'text-sm'}>📍</Text>
-                                    <View className={'h-1 w-1 rounded-full bg-slate-500'} />
-                                    <Text className={'text-sm'}>🚶</Text>
-                                    <View className={'h-1 w-1 rounded-full bg-slate-500'} />
-                                    <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
-                                    <Text className={'text-sm'}>🚌 {busCode} </Text>
-                                    <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
-                                    <Text className={'text-sm'}>🏁</Text>
-                                </View>
-
-                                <View className={'mt-2 flex-row items-center'}>
-                                    <Text className={'flex-1 text-[10px] text-slate-500'} numberOfLines={1}>
-                                        {walkLabel}
+                                <View className={'mt-4'}>
+                                    <Text className={'text-xs font-semibold text-slate-700'}>
+                                        Next bus: {formatEta(primaryEtaSeconds)}
                                     </Text>
-                                    <Text className={'flex-1 text-[10px] text-slate-500 text-center'} numberOfLines={1}>
-                                        {busDuration}
+                                    <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
+                                        From: {primaryStopName || boardingLabel}
                                     </Text>
-                                    <Text className={'flex-1 text-[10px] text-slate-500 text-right'} numberOfLines={1}>
-                                        {totalDuration}
+                                    <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
+                                        To: {arrivalLabel}
                                     </Text>
                                 </View>
-
-                                {isExpanded && index === activeIndex && (
-                                    <View className={'mt-3 space-y-2'}>
-                                        {leg.steps.map((step, i) => {
-                                            const isWalk = step.travelMode === 'walking';
-                                            const icon = isWalk ? '🚶' : '🚌';
-                                            const action = isWalk ? 'walk to' : 'ride to';
-                                            const walkInstruction = (step as any)?.htmlInstruction;
-                                            const walkDuration = step.duration?.text ?? '';
-                                            const description = isWalk
-                                                ? `${walkDuration} ${walkInstruction ?? `walk to ${step.arrivalStop ?? destinationLabel}`}`.trim()
-                                                : `${step.duration?.text ?? ''} ${action} ${step.arrivalStop ?? destinationLabel}`;
-                                            return (
-                                                <View key={i} className={'flex-row items-center'}>
-                                                    <Text className={'mr-2 text-base'}>{icon}</Text>
-                                                    <Text className={'text-sm text-slate-700'} numberOfLines={1}>
-                                                        {description}
-                                                    </Text>
-                                                </View>
-                                            );
-                                        })}
-                                    </View>
-                                )}
                             </View>
-
-                            {index === activeIndex && (
-                                <>
-                                    <View className={'mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3'}>
-                                        <View className={'flex-row items-center justify-between'}>
-                                            <Text className={'text-xs font-semibold text-slate-700'} numberOfLines={1}>
-                                                Next: {formatEta(primaryEtaSeconds)}
-                                            </Text>
-                                            <Text className={'text-xs text-slate-600'} numberOfLines={1}>
-                                                Stop: {primaryStopName || firstTransit?.departureStop || 'Boarding'}
-                                            </Text>
-                                        </View>
-                                        {selectedStop && (
-                                            <Text className={'mt-2 text-xs text-slate-600'} numberOfLines={2}>
-                                                Selected: {selectedStop.description} ({selectedStop.busStopCode}) · Bus {selectedStop.serviceNo}:{' '}
-                                                {formatEta(selectedEtaSeconds)}
-                                            </Text>
-                                        )}
-                                    </View>
-
-                                    <TouchableOpacity className={'mt-3 rounded-full bg-slate-900 py-3'} onPress={() => {}}>
-                                        <Text className={'text-center text-sm font-bold text-white'}>START NAV</Text>
-                                    </TouchableOpacity>
-                                </>
-                            )}
                         </View>
                     );
                 })}
                 </PagerView>
+
+                {renderDots(options.length, activeIndex)}
             </View>
         </View>
     );

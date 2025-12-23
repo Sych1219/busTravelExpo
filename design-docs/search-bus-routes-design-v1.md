@@ -79,10 +79,10 @@ Implementation options (already in deps):
 - **Top 60%**: Map (react-native-maps)
   - polylines for steps (bus vs walk colors)
   - bus-stop dots (markers)
-- **Bottom 40%**: Route sheet (bottom card / bottom sheet)
-  - route summary (duration, transfers, walk time)
-  - segment list (walk + bus segments)
-  - next-bus countdown for the “next boarding stop” (and/or selected stop)
+- **Bottom 40%**: “Transit Line Strip” (compact bottom card)
+  - route as a single line with key nodes (start/boarding/ride/destination)
+  - one primary “next” row (ETA + platform/bay when available)
+  - primary CTA: `START NAV`
 
 ### Text Wireframe (Screen 2)
 ```
@@ -101,17 +101,22 @@ Implementation options (already in deps):
 │                                                    │
 │              (Pager)        ●  ○  ○                │
 ├────────────────────────────────────────────────────┤
-│  ROUTE SHEET (bottom)                              │
-│  24 mins   ·   1 transfer   ·   ~6 mins walk       │
-│  Next bus (11) @ Stop A: 3 min                     │
-│  ────────────────────────────────────────────────  │
-│  Walk 350 m · 5 mins                               │
-│  Bus 11 · 4 stops · Stop A → Stop B                │
-│  Walk 120 m · 2 mins                               │
-│  Bus 22 · 3 stops · Stop B → Stop C                │
-│  Walk 180 m · 3 mins                               │
+│  “Transit Line Strip” (below map)                  │
+│  (focus: route as a line, super compact)           │
 │                                                    │
-│  Tip: tap a stop dot for details + ETA             │
+│  ┌────────────────────────────────────┐            │
+│  │  🚶 20m        🚌 858 (2)        📍 │            │
+│  │  ────────●──────────●──────────●   │            │
+│  │          Stop        Ride       PTB3│           │
+│  └────────────────────────────────────┘            │
+│                                                    │
+│  ┌────────────────────────────────────┐            │
+│  │  Next: 2m      Platform: Aft Punggol│           │
+│  └────────────────────────────────────┘            │
+│                                                    │
+│  ┌────────────────────────────────────┐            │
+│  │          [ START NAV ]              │            │
+│  └────────────────────────────────────┘            │
 └────────────────────────────────────────────────────┘
 ```
 
@@ -123,29 +128,23 @@ Implementation options (already in deps):
   - emphasized start/end/transfer stops (larger or outlined)
 - Tapping a stop dot opens a small callout with:
   - stop name/code
-  - “Next bus: X min” for the relevant service (see “Next Bus” section)
+  - “Next bus: X min” for the relevant service (see “Next (ETA) row” section)
 
-### Route Summary (bottom sheet header)
-For the active route option:
-- Total duration (e.g., `24 mins`)
-- Transfers count (e.g., `1 transfer`)
-- Walk distance/time (e.g., `~6 mins walk`)
-- First/last stop (optional compact line)
+### Transit Line Strip (bottom card)
+For the active route option (single, compact line):
+- Left-to-right: walk → board stop → ride segment(s) → destination node.
+- Show key labels only (e.g., boarding stop name, service number, destination/POI short code).
+- Keep the visual strip tappable: tapping a node highlights the corresponding stop dot on the map.
 
-### Segment List (bottom sheet body)
-List the steps grouped into segments:
-- Walking segment: `Walk 350 m · 5 mins`
-- Bus segment: `Bus 11 · 4 stops · Stop A → Stop B`
-- Show transfer points clearly.
-
-### Next Bus (ETA) UI
+### Next (ETA) row
 V1 recommendation to keep it useful + cheap:
 - Show **one primary countdown**: next bus for the route’s first upcoming transit segment (the first `travelMode === "transit"` step).
-- If user taps a stop dot, fetch and show ETA for that stop/service.
+- If user taps a stop dot / node, fetch and show ETA for that stop/service.
 
-UI placements:
-- A small pill in the route sheet: `Next bus (11) at Stop A: 3 min`
-- Optional badge on the boarding stop dot on the map.
+Also show platform/bay when the backend provides it (otherwise omit).
+
+### Primary CTA
+`START NAV` starts navigation mode (V1 can be “lightweight” — e.g., keep map centered + show the same strip and ETA updates).
 
 ---
 

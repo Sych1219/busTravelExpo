@@ -1,4 +1,4 @@
-import {View, Text, ActivityIndicator} from "react-native";
+import {View, Text, TouchableOpacity, ActivityIndicator} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
@@ -328,22 +328,38 @@ const RouteResultsView = () => {
                     const boardingLabel = getBoardingLabel(leg);
                     const arrivalLabel = getArrivalLabel(leg);
                     const isRecommended = index === 0;
+                    const nextTimesLabel = '--';
 
                     return (
                         <View key={index} className={'px-5 pb-4'}>
                             <View className={'rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
                                 <View className={'flex-row items-center justify-between'}>
-                                    <Text className={'text-xs font-bold text-amber-600'}>NEXT BUS</Text>
-                                    <Text className={'text-base font-extrabold text-slate-900'}>
-                                        {formatEta(primaryEtaSeconds)}
+                                    <Text className={'text-xs font-semibold text-slate-800'}>
+                                        {busCode ?? '--'}   Tags: --
                                     </Text>
                                 </View>
-                                <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
-                                    From: {primaryStopName || boardingLabel}
-                                </Text>
-                                <Text className={'mt-1 text-xs text-slate-600'} numberOfLines={1}>
+                                <View className={'mt-2 flex-row items-center justify-between'}>
+                                    <Text className={'text-xs text-slate-700'}>
+                                        ETA: {formatEta(primaryEtaSeconds)}
+                                    </Text>
+                                    <Text className={'text-xs text-slate-500'}>
+                                        Next: {nextTimesLabel}
+                                    </Text>
+                                </View>
+                                <Text className={'mt-2 text-xs text-slate-600'} numberOfLines={1}>
                                     To: {arrivalLabel}
                                 </Text>
+                                <View className={'mt-3 flex-row items-center justify-between'}>
+                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
+                                        <Text className={'text-xs text-slate-700'}>Notify</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
+                                        <Text className={'text-xs text-slate-700'}>Save</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
+                                        <Text className={'text-xs text-slate-700'}>Details</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
 
                             <View className={'mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3'}>

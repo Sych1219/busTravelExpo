@@ -105,9 +105,9 @@ Implementation options (already in deps):
 │  (focus: route as a line, super compact)           │
 │                                                    │
 │  ┌────────────────────────────────────┐            │
-│  │  ⌄  Lot 83        Pattee TC       Westgate Bldg │
+│  │  ⌄          Pattee TC          Westgate Bldg    │
 │  │  ◎ · 🚶 20m · 🚌 858 (2) · ◎ ─── ◎ ─── ◎ · 🏁    │
-│  │  1:00pm        1:12pm          1:16pm           │
+│  │             1:12pm             1:16pm           │
 │  └────────────────────────────────────┘            │
 │  (Tap to expand details)                           │
 │  • 🚶 5 min walk to Lot 83                         │
@@ -124,7 +124,7 @@ Implementation options (already in deps):
 └────────────────────────────────────────────────────┘
 ```
 
-### Map Visual Rules
+### Map Visual Rules    
 - **Bus segments**: solid polyline (e.g., green/blue)
 - **Walking segments**: dashed polyline (e.g., red, dashed)
 - **Bus stop dots**:
@@ -137,8 +137,8 @@ Implementation options (already in deps):
 ### Transit Line Strip (bottom card)
 For the active route option (single, compact line):
 - Single inline timeline row: origin icon → walk icon + distance → bus icon + transit stop → stop nodes → destination flag (all icons in one line).
-- Above the line: stop names (origin/boarding, transfer/arrival) on one row (e.g., `Lot 83   Pattee TC   Westgate Bldg`).
-- Below the line: times aligned with their stop labels (e.g., `1:00pm   1:12pm   1:16pm`).
+- Above the line: transit stop names only (boarding/transfer/destination) on one row (e.g., `Pattee TC   Westgate Bldg`).
+- Below the line: times aligned with their stop labels (e.g., `1:12pm   1:16pm`).
 - Add a simple collapse/expand affordance (e.g., chevron ⌃/⌄) aligned with the top row; collapsed state can hide the labels/times if needed.
 - Keep the visual strip tappable: tapping a node highlights the corresponding stop dot on the map.
 - Show key labels only (e.g., boarding stop name, service number, destination/POI short code).

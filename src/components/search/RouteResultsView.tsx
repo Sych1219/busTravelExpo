@@ -341,7 +341,7 @@ const RouteResultsView = () => {
                     const mockBusStopCode = selectedStop?.busStopCode ?? primaryStopCode ?? '--';
 
                     return (
-                        <ScrollView key={index} className={'px-5 pb-4'}>
+                        <ScrollView key={index} className={'px-1 pb-4'}>
                             <NearbyBusItem
                                 busStopCode={mockBusStopCode}
                                 service={mockService}

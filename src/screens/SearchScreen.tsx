@@ -21,9 +21,7 @@ const SearchScreen = () => {
                 component={RouteResultsView}
                 options={({route}) => ({headerShown: true, title: route.params?.destinationDescription ?? ""})}
             />
-            {/* <Stack.Screen name="RouteView" component={RouteView} options={{headerShown: true, title: ""}}/> */}
         </Stack.Navigator>
-        // <SearchView/>
     );
 }
 

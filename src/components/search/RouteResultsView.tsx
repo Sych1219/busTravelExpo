@@ -383,15 +383,12 @@ const RouteResultsView = () => {
                                 </View>
 
                                 <View className={'mt-2 flex-row items-center'}>
-                                    <View className={'h-2 w-2 rounded-full bg-slate-900'} />
-                                    <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
+                                    <Text className={'text-sm'}>📍</Text>
+                                    <View className={'h-1 w-1 rounded-full bg-slate-500'} />
                                     <Text className={'text-sm'}>🚶</Text>
+                                    <View className={'h-1 w-1 rounded-full bg-slate-500'} />
                                     <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
-                                    <View className={'h-2 w-2 rounded-full bg-slate-900'} />
-                                    <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
-                                    <Text className={'text-sm'}>🚌 {busCode ?? '--'} {stopsCount != null ? `(${stopsCount})` : ''}</Text>
-                                    <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
-                                    <View className={'h-2 w-2 rounded-full bg-slate-900'} />
+                                    <Text className={'text-sm'}>🚌 {busCode} </Text>
                                     <View className={'flex-1 h-0.5 bg-slate-300 mx-1'} />
                                     <Text className={'text-sm'}>🏁</Text>
                                 </View>
@@ -414,8 +411,10 @@ const RouteResultsView = () => {
                                             const isWalk = step.travelMode === 'walking';
                                             const icon = isWalk ? '🚶' : '🚌';
                                             const action = isWalk ? 'walk to' : 'ride to';
+                                            const walkInstruction = (step as any)?.htmlInstruction;
+                                            const walkDuration = step.duration?.text ?? '';
                                             const description = isWalk
-                                                ? (step as any)?.htmlInstruction ?? `${step.duration?.text ?? ''} walk`
+                                                ? `${walkDuration} ${walkInstruction ?? `walk to ${step.arrivalStop ?? destinationLabel}`}`.trim()
                                                 : `${step.duration?.text ?? ''} ${action} ${step.arrivalStop ?? destinationLabel}`;
                                             return (
                                                 <View key={i} className={'flex-row items-center'}>

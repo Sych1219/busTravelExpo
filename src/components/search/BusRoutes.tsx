@@ -15,7 +15,6 @@ interface BusRoutesProps {
 }
 
 export interface Step {
-    htmlInstruction: string;
     distance: TextValue
     duration: TextValue
     departureStop: string;

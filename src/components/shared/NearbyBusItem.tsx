@@ -38,10 +38,11 @@ interface NearbyBusItemProps {
     busStopCode: string;
     service: Service;
     variant?: 'pinned' | 'default';
+    disableAutoRefresh?: boolean;
 }
 
 const NearbyBusItem = ({
-                           busStopCode, service, variant = 'default'
+                           busStopCode, service, variant = 'default', disableAutoRefresh = false
                        }: NearbyBusItemProps) => {
 
     let deviceId: number = Constants.deviceId;
@@ -159,7 +160,7 @@ const NearbyBusItem = ({
             >
                 <Pressable
                     onPress={() => {
-                        if (!isExpanded) {
+                        if (!isExpanded && !disableAutoRefresh) {
                             updateBusService(busStopCode, serviceNo);
                         }
                         setIsExpanded((prev) => !prev);

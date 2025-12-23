@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ActivityIndicator} from "react-native";
+import {View, Text, ActivityIndicator} from "react-native";
 import {RouteProp, useRoute} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
@@ -11,8 +11,7 @@ import MapView, {Marker, Polyline} from "react-native-maps";
 import polyline from "polyline";
 import PagerView from "react-native-pager-view";
 import {BusRouteVO} from "@components/search/ListWalkAndStopsView";
-import {Service} from "@components/shared/NearbyBusItem";
-import {formatCountdown} from "@utils/UtilsMethod";
+import NearbyBusItem, {NextBus, Service} from "@components/shared/NearbyBusItem";
 
 type ScreenState = 'loading' | 'success' | 'empty' | 'error' | 'needs_location';
 type RouteResultsRouteProp = RouteProp<StackParamList, 'RouteResultsView'>;
@@ -43,7 +42,7 @@ const RouteResultsView = () => {
 
     const [stopMarkers, setStopMarkers] = useState<StopMarker[]>([]);
     const [primaryEtaSeconds, setPrimaryEtaSeconds] = useState<number | null>(null);
-    const [primaryStopName, setPrimaryStopName] = useState<string>("");
+    const [primaryStopCode, setPrimaryStopCode] = useState<string>("");
     const [primaryBusCode, setPrimaryBusCode] = useState<string>("");
     const [primaryStopsCount, setPrimaryStopsCount] = useState<number | null>(null);
     const [selectedStop, setSelectedStop] = useState<StopMarker | null>(null);
@@ -96,7 +95,7 @@ const RouteResultsView = () => {
     useEffect(() => {
         setStopMarkers([]);
         setPrimaryEtaSeconds(null);
-        setPrimaryStopName("");
+        setPrimaryStopCode("");
         setPrimaryBusCode("");
         setPrimaryStopsCount(null);
         setSelectedStop(null);
@@ -141,7 +140,7 @@ const RouteResultsView = () => {
                 const boarding = firstSegment[0];
                 const firstTransit = transitSteps[0];
                 if (boarding?.busStopCode && firstTransit?.busCode) {
-                    setPrimaryStopName(boarding.busStopVO?.description ?? boarding.busStopCode ?? '');
+                    setPrimaryStopCode(boarding.busStopCode ?? '');
                     setPrimaryBusCode(firstTransit.busCode);
                     setPrimaryStopsCount(firstTransit.numStops ?? null);
                     const etaResp = await axios.get<Service>(busServiceUrl, {
@@ -191,22 +190,12 @@ const RouteResultsView = () => {
         </View>
     );
 
-    const formatEta = (seconds: number | null) => {
-        if (seconds == null) return 'Arr';
-        return formatCountdown(seconds);
-    };
-
     const getFirstWalkLabel = (leg: Leg) => {
         const walk = leg.steps.find((s) => s.travelMode === 'walking');
         return walk?.distance?.text ?? '0 m';
     };
 
     const getFirstTransit = (leg: Leg) => leg.steps.find((s) => s.travelMode === 'transit');
-
-    const getBoardingLabel = (leg: Leg) => {
-        const transit = getFirstTransit(leg);
-        return transit?.departureStop || 'Boarding';
-    };
 
     const getArrivalLabel = (leg: Leg) => {
         const transit = getFirstTransit(leg);
@@ -220,6 +209,30 @@ const RouteResultsView = () => {
 
     const selectStop = (stop: StopMarker) => {
         setSelectedStop(stop);
+    };
+
+    const buildMockNextBus = (countDown: number | null, destinationCode: string): NextBus => ({
+        countDown: countDown ?? 300,
+        originCode: '',
+        destinationCode,
+        estimatedArrival: '',
+        latitude: '',
+        longitude: '',
+        visitNumber: '',
+        load: '',
+        feature: '',
+        type: '',
+    });
+
+    const buildMockService = (serviceNo: string, destinationCode: string, countDown: number | null): Service => {
+        const primaryCountDown = countDown ?? 300;
+        return {
+            serviceNo,
+            operator: '',
+            nextBus: buildMockNextBus(primaryCountDown, destinationCode),
+            nextBus2: buildMockNextBus(primaryCountDown + 600, destinationCode),
+            nextBus3: buildMockNextBus(primaryCountDown + 1200, destinationCode),
+        };
     };
 
     if (state === 'loading') {
@@ -325,42 +338,19 @@ const RouteResultsView = () => {
                     const walkLabel = getFirstWalkLabel(leg);
                     const stopsCount = firstTransit?.numStops ?? primaryStopsCount;
                     const busCode = firstTransit?.busCode ?? primaryBusCode;
-                    const boardingLabel = getBoardingLabel(leg);
                     const arrivalLabel = getArrivalLabel(leg);
                     const isRecommended = index === 0;
-                    const nextTimesLabel = '--';
+                    const mockService = buildMockService(busCode ?? '--', arrivalLabel, primaryEtaSeconds);
+                    const mockBusStopCode = selectedStop?.busStopCode ?? primaryStopCode ?? '--';
 
                     return (
                         <View key={index} className={'px-5 pb-4'}>
-                            <View className={'rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
-                                <View className={'flex-row items-center justify-between'}>
-                                    <Text className={'text-xs font-semibold text-slate-800'}>
-                                        {busCode ?? '--'}   Tags: --
-                                    </Text>
-                                </View>
-                                <View className={'mt-2 flex-row items-center justify-between'}>
-                                    <Text className={'text-xs text-slate-700'}>
-                                        ETA: {formatEta(primaryEtaSeconds)}
-                                    </Text>
-                                    <Text className={'text-xs text-slate-500'}>
-                                        Next: {nextTimesLabel}
-                                    </Text>
-                                </View>
-                                <Text className={'mt-2 text-xs text-slate-600'} numberOfLines={1}>
-                                    To: {arrivalLabel}
-                                </Text>
-                                <View className={'mt-3 flex-row items-center justify-between'}>
-                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
-                                        <Text className={'text-xs text-slate-700'}>Notify</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
-                                        <Text className={'text-xs text-slate-700'}>Save</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity className={'rounded-full border border-slate-200 px-3 py-1'} onPress={() => {}}>
-                                        <Text className={'text-xs text-slate-700'}>Details</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                            <NearbyBusItem
+                                busStopCode={mockBusStopCode}
+                                service={mockService}
+                                variant={isRecommended ? 'pinned' : 'default'}
+                                disableAutoRefresh
+                            />
 
                             <View className={'mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
                                 <View className={'flex-row items-center justify-between'}>

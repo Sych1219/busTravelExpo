@@ -41,18 +41,18 @@ const RouteView = () => {
             latitude,
             longitude,
         }));
-        if (step.busCode != null) {
+        if (step.travelMode === 'transit' && step.busCode != null) {
             return {
                 legPoints: points,
-                startAddress: step.departureStop,
-                endAddress: step.arrivalStop,
+                startAddress: step.departureStop ?? '',
+                endAddress: step.arrivalStop ?? '',
                 type: "bus"
             }
         } else {
             return {
                 legPoints: points,
-                startAddress: step.departureStop,
-                endAddress: step.arrivalStop,
+                startAddress: step.departureStop ?? '',
+                endAddress: step.arrivalStop ?? '',
                 type: "walking"
             }
         }

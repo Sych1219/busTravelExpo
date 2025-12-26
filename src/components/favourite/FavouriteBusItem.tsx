@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import ArrvingInfoCard from "@components/favourite/ArrvingInfoCard";
 import Divider from "@components/search/Divider";
 import {getBusType, getLoadColor} from "@utils/UtilsMethod";
-
+import type {NextBus} from "@components/shared/NearbyBusItem";
 
 export interface Service {
     serviceNo: string;
@@ -11,20 +11,6 @@ export interface Service {
     nextBus: NextBus;
     nextBus2: NextBus;
     nextBus3: NextBus;
-}
-
-export interface NextBus {
-    countDown: number;
-    originCode: string;
-    destinationCode: string;
-    estimatedArrival: string;
-    latitude: string;
-    longitude: string;
-    visitNumber: string;
-    load: string;
-    feature: string;
-    type: string;
-
 }
 
 const FavouriteBusItem = ({

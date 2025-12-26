@@ -9,6 +9,7 @@ import {useNavigation} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {mergeLegs} from "@components/search/routeUtils";
+import type {Service} from "@components/shared/NearbyBusItem";
 
 interface BusRoutesProps {
     destinationPlaceId: string;
@@ -17,15 +18,16 @@ interface BusRoutesProps {
 export interface Step {
     distance: TextValue
     duration: TextValue
-    departureStop: string;
+    departureStop: string | null;
     startLocation: LatLng
-    arrivalStop: string;
+    arrivalStop: string | null;
     endLocation: LatLng
-    numStops: number;
-    busCode: string;
+    numStops: number | null;
+    busCode: string | null;
     travelMode: "driving" | "walking" | "bicycling" | "transit";
     polyline: Polyline;
     htmlInstruction?: string;
+    serviceVO?: Service | null;
 }
 
 export interface Polyline {
@@ -56,6 +58,7 @@ export interface Leg {
 
 export interface Route {
     legs: Leg[];
+    totalDuration?: number;
 }
 
 export interface StartEndStop {
@@ -143,13 +146,13 @@ const mockLegs: Leg[] = [];
 function mapLegToStartEndStopServiceNo(leg: Leg): StartEndStopServiceNo {
     const startEndStops: StartEndStop[] = leg.steps.map((step) => {
         return {
-            startStopName: step.departureStop,
-            endStopName: step.arrivalStop,
+            startStopName: step.departureStop ?? '',
+            endStopName: step.arrivalStop ?? '',
         }
     });
     return {
         startEndStops: startEndStops,
-        serviceNo: leg.steps[0].busCode,
+        serviceNo: leg.steps[0]?.busCode ?? '',
     }
 }
 

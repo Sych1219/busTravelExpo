@@ -4,14 +4,14 @@ import {StackParamList} from "../../screens/SearchScreen";
 import {useLocation} from "@utils/CustomerHook";
 import {useEffect, useMemo, useState} from "react";
 import axios from "axios";
-import {busRoutesByStopNameUrl, busServiceUrl, routesUrl} from "@utils/UrlsUtil";
+import {busRoutesByStopNameUrl, routesUrl} from "@utils/UrlsUtil";
 import {Leg, Route, Step} from "@components/search/BusRoutes";
 import {mergeLegs} from "@components/search/routeUtils";
 import MapView, {Marker, Polyline} from "react-native-maps";
 import polyline from "polyline";
 import PagerView from "react-native-pager-view";
 import {BusRouteVO} from "@components/search/ListWalkAndStopsView";
-import NearbyBusItem, {NextBus, Service} from "@components/shared/NearbyBusItem";
+import NearbyBusItem, {Service} from "@components/shared/NearbyBusItem";
 
 type ScreenState = 'loading' | 'success' | 'empty' | 'error' | 'needs_location';
 type RouteResultsRouteProp = RouteProp<StackParamList, 'RouteResultsView'>;
@@ -41,10 +41,6 @@ const RouteResultsView = () => {
     const activeLeg = options[activeIndex];
 
     const [stopMarkers, setStopMarkers] = useState<StopMarker[]>([]);
-    const [primaryEtaSeconds, setPrimaryEtaSeconds] = useState<number | null>(null);
-    const [primaryStopCode, setPrimaryStopCode] = useState<string>("");
-    const [primaryBusCode, setPrimaryBusCode] = useState<string>("");
-    const [primaryStopsCount, setPrimaryStopsCount] = useState<number | null>(null);
     const [selectedStop, setSelectedStop] = useState<StopMarker | null>(null);
 
     useEffect(() => {
@@ -94,10 +90,6 @@ const RouteResultsView = () => {
 
     useEffect(() => {
         setStopMarkers([]);
-        setPrimaryEtaSeconds(null);
-        setPrimaryStopCode("");
-        setPrimaryBusCode("");
-        setPrimaryStopsCount(null);
         setSelectedStop(null);
 
         if (!activeLeg) return;
@@ -105,10 +97,11 @@ const RouteResultsView = () => {
         const transitSteps = activeLeg.steps.filter((s) => s.travelMode === 'transit' && !!s.busCode);
         if (transitSteps.length === 0) return;
 
-        const fetchStopsAndEta = async () => {
+        const fetchStops = async () => {
             try {
                 const allSegments: BusRouteVO[][] = [];
                 for (const step of transitSteps) {
+                    if (!step.departureStop || !step.arrivalStop || !step.busCode) continue;
                     const response = await axios.get<BusRouteVO[]>(busRoutesByStopNameUrl, {
                         params: {
                             departureStop: step.departureStop,
@@ -135,25 +128,12 @@ const RouteResultsView = () => {
                     });
                 }
                 setStopMarkers(markers);
-
-                const firstSegment = allSegments[0] ?? [];
-                const boarding = firstSegment[0];
-                const firstTransit = transitSteps[0];
-                if (boarding?.busStopCode && firstTransit?.busCode) {
-                    setPrimaryStopCode(boarding.busStopCode ?? '');
-                    setPrimaryBusCode(firstTransit.busCode);
-                    setPrimaryStopsCount(firstTransit.numStops ?? null);
-                    const etaResp = await axios.get<Service>(busServiceUrl, {
-                        params: {busStopCode: boarding.busStopCode, busCode: firstTransit.busCode},
-                    });
-                    setPrimaryEtaSeconds(etaResp.data?.nextBus?.countDown ?? null);
-                }
             } catch (e) {
-                console.log("RouteResultsView stop/eta fetch error", e);
+                console.log("RouteResultsView stop fetch error", e);
             }
         };
 
-        void fetchStopsAndEta();
+        void fetchStops();
     }, [activeLeg]);
 
 
@@ -209,30 +189,6 @@ const RouteResultsView = () => {
 
     const selectStop = (stop: StopMarker) => {
         setSelectedStop(stop);
-    };
-
-    const buildMockNextBus = (countDown: number | null, destinationCode: string): NextBus => ({
-        countDown: countDown ?? 300,
-        originCode: '',
-        destinationCode,
-        estimatedArrival: '',
-        latitude: '',
-        longitude: '',
-        visitNumber: '',
-        load: '',
-        feature: '',
-        type: '',
-    });
-
-    const buildMockService = (serviceNo: string, destinationCode: string, countDown: number | null): Service => {
-        const primaryCountDown = countDown ?? 300;
-        return {
-            serviceNo,
-            operator: '',
-            nextBus: buildMockNextBus(primaryCountDown, destinationCode),
-            nextBus2: buildMockNextBus(primaryCountDown + 600, destinationCode),
-            nextBus3: buildMockNextBus(primaryCountDown + 1200, destinationCode),
-        };
     };
 
     if (state === 'loading') {
@@ -333,18 +289,38 @@ const RouteResultsView = () => {
                 {options.map((leg, index) => {
                     const firstTransit = getFirstTransit(leg);
                     const walkLabel = getFirstWalkLabel(leg);
-                    const stopsCount = firstTransit?.numStops ?? primaryStopsCount;
-                    const busCode = firstTransit?.busCode ?? primaryBusCode;
+                    const stopsCount = firstTransit?.numStops;
+                    const busCode = firstTransit?.busCode;
                     const arrivalLabel = getArrivalLabel(leg);
                     const isRecommended = index === 0;
-                    const mockService = buildMockService(busCode ?? '--', arrivalLabel, primaryEtaSeconds);
-                    const mockBusStopCode = selectedStop?.busStopCode ?? primaryStopCode ?? '--';
+                    const serviceFromStep = firstTransit?.serviceVO ?? null;
+                    const service: Service = serviceFromStep
+                        ? {
+                            ...serviceFromStep,
+                            nextBus: serviceFromStep.nextBus
+                                ? {...serviceFromStep.nextBus, destinationCode: serviceFromStep.nextBus.destinationCode ?? arrivalLabel}
+                                : null,
+                            nextBus2: serviceFromStep.nextBus2
+                                ? {...serviceFromStep.nextBus2, destinationCode: serviceFromStep.nextBus2.destinationCode ?? arrivalLabel}
+                                : null,
+                            nextBus3: serviceFromStep.nextBus3
+                                ? {...serviceFromStep.nextBus3, destinationCode: serviceFromStep.nextBus3.destinationCode ?? arrivalLabel}
+                                : null,
+                        }
+                        : {
+                            serviceNo: busCode ?? '--',
+                            operator: '',
+                            nextBus: null,
+                            nextBus2: null,
+                            nextBus3: null,
+                        };
+                    const busStopCode = selectedStop?.busStopCode ?? '--';
 
                     return (
                         <ScrollView key={index} className={'px-1 pb-4'}>
                             <NearbyBusItem
-                                busStopCode={mockBusStopCode}
-                                service={mockService}
+                                busStopCode={busStopCode}
+                                service={service}
                                 variant={isRecommended ? 'pinned' : 'default'}
                                 disableAutoRefresh
                             />

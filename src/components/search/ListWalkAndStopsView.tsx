@@ -87,10 +87,10 @@ const ListWalkAndStopsView = () => {
 
         if (step.travelMode === 'transit') {
             const startAndEndStopInfo: StartAndEndStopInfo = {
-                departureStop: step.departureStop,
-                arrivalStop: step.arrivalStop,
-                numStops: step.numStops,
-                serviceNo: step.busCode
+                departureStop: step.departureStop ?? '',
+                arrivalStop: step.arrivalStop ?? '',
+                numStops: step.numStops ?? 0,
+                serviceNo: step.busCode ?? ''
             }
             startAndEndStopInfos.push(startAndEndStopInfo);
         }

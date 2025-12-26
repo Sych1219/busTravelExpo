@@ -8,24 +8,23 @@ import {useLocation} from "@utils/CustomerHook";
 
 export interface Service {
     serviceNo: string;
-    operator: string;
-    nextBus: NextBus;
-    nextBus2: NextBus;
-    nextBus3: NextBus;
+    operator?: string;
+    nextBus: NextBus | null;
+    nextBus2?: NextBus | null;
+    nextBus3?: NextBus | null;
 }
 
 export interface NextBus {
     countDown: number;
-    originCode: string;
-    destinationCode: string;
-    estimatedArrival: string;
-    latitude: string;
-    longitude: string;
-    visitNumber: string;
-    load: string;
-    feature: string;
-    type: string;
-
+    estimatedArrival?: string;
+    latitude?: string;
+    longitude?: string;
+    visitNumber?: string;
+    load?: string;
+    feature?: string;
+    type?: string;
+    originCode?: string;
+    destinationCode?: string;
 }
 
 export interface BusServiceParams {
@@ -51,8 +50,11 @@ const NearbyBusItem = ({
     }
 
     const [serviceInside, setServiceInside] = useState<Service>(service);
-    const {nextBus, nextBus2, nextBus3, serviceNo}: Service = serviceInside;
-    const isWheelChairAccessible = nextBus.feature === 'WAB'
+    const nextBus = serviceInside.nextBus;
+    const nextBus2 = serviceInside.nextBus2 ?? null;
+    const nextBus3 = serviceInside.nextBus3 ?? null;
+    const serviceNo = serviceInside.serviceNo;
+    const isWheelChairAccessible = nextBus?.feature === 'WAB'
     const location = useLocation().location;
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -102,7 +104,7 @@ const NearbyBusItem = ({
         if (isWheelChairAccessible) {
             tags.push('Accessible');
         }
-        if (nextBus.type === 'DD') {
+        if (nextBus?.type === 'DD') {
             tags.push('DD');
         }
         if (tags.length === 0) {
@@ -170,17 +172,17 @@ const NearbyBusItem = ({
                     <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center space-x-3">
                             <Text className="text-2xl font-extrabold text-slate-900">{serviceNo}</Text>
-                            <View className="flex-row items-center space-x-2">
-                                {isWheelChairAccessible && (
-                                    <View>
-                                        <Image
-                                            source={require('../../assets/wheelchair.jpg')}
+                        <View className="flex-row items-center space-x-2">
+                            {isWheelChairAccessible && (
+                                <View>
+                                    <Image
+                                        source={require('../../assets/wheelchair.jpg')}
                                             className="h-4 w-4"
                                             resizeMode="contain"
                                         />
                                     </View>
                                 )}
-                                {nextBus.type === 'DD' && (
+                                {nextBus?.type === 'DD' && (
                                     <View className="rounded-full bg-slate-100 px-2 py-0.5">
                                         <Text className="text-xs font-semibold text-slate-700">DD</Text>
                                     </View>

@@ -113,7 +113,8 @@ const TwoPointsWithCurve = ({busRouteVOs}: BusServiceNoAndBusRouteVOs) => {
     let intervalIdToClear: NodeJS.Timeout = null;
     const animateBus = () => {
         axios.get<Service>(busServiceUrl, busServiceUrlParameter).then((response) => {
-            setBusCountDown(response.data.nextBus.countDown);
+            const nextBus = response.data.nextBus;
+            setBusCountDown(nextBus?.countDown ?? 0);
             const intervalId = setInterval(() => {
                 setBusCountDown((prevCountDown) => {
                     if (prevCountDown - 1 <= 0) {
@@ -129,7 +130,7 @@ const TwoPointsWithCurve = ({busRouteVOs}: BusServiceNoAndBusRouteVOs) => {
 
             Animated.timing(busPosition, {
                 toValue: 1, // End value (100% progress)
-                duration: response.data.nextBus.countDown * 100, // Duration in milliseconds (adjust as needed)
+                duration: (nextBus?.countDown ?? 0) * 100, // Duration in milliseconds (adjust as needed)
                 useNativeDriver: false, // Set this to true if possible for better performance
             }).start(() => {
                 // Animation has completed, reset the busPosition and restart the animation

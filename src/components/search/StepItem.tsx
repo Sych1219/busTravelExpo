@@ -28,14 +28,14 @@ const StepItem = ({step, index, showArrow, differentBusCodeCounts}: StepItemProp
                 </View>)}
             {step.travelMode === "transit" && (
                 <View className={'flex-row mr-1'}>
-                    <View className={'flex-row mr-2'}>
-                        <View className="mr-3">
-                            <FontAwesome5 name="bus" size={15} color="black"/>
+                        <View className={'flex-row mr-2'}>
+                            <View className="mr-3">
+                                <FontAwesome5 name="bus" size={15} color="black"/>
+                            </View>
+                            <View className="bg-green-500 flex items-center pl-1 pr-1 ">
+                            <Text className="font-black">{step.busCode ?? '--'}</Text>
+                            </View>
                         </View>
-                        <View className="bg-green-500 flex items-center pl-1 pr-1 ">
-                            <Text className="font-black">{step.busCode}</Text>
-                        </View>
-                    </View>
 
                     {showArrow && (<MaterialIcons name={'keyboard-arrow-right'} size={15}/>)}
                 </View>)}

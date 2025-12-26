@@ -6,7 +6,7 @@ import {useEffect, useMemo, useState} from "react";
 import axios from "axios";
 import {busRoutesByStopNameUrl, routesUrl} from "@utils/UrlsUtil";
 import {Leg, Route, Step} from "@components/search/BusRoutes";
-import {mergeLegs} from "@components/search/routeUtils";
+import {formatDuration} from "@components/search/routeUtils";
 import MapView, {Marker, Polyline} from "react-native-maps";
 import polyline from "polyline";
 import PagerView from "react-native-pager-view";
@@ -35,13 +35,17 @@ const RouteResultsView = () => {
     const {location, errorMsg} = useLocation();
 
     const [state, setState] = useState<ScreenState>('loading');
-    const [options, setOptions] = useState<Leg[]>([]);
+    const [options, setOptions] = useState<Route[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
 
-    const activeLeg = options[activeIndex];
+    const activeRoute = options[activeIndex];
 
     const [stopMarkers, setStopMarkers] = useState<StopMarker[]>([]);
     const [selectedStop, setSelectedStop] = useState<StopMarker | null>(null);
+    const [boardingStopCodesByStepKey, setBoardingStopCodesByStepKey] = useState<Record<string, string>>({});
+
+    const getRouteSteps = (r: Route | undefined) => (r?.legs ?? []).flatMap((l) => l.steps ?? []);
+    const getStepKey = (step: Step) => `${step.departureStop ?? ''}|${step.arrivalStop ?? ''}|${step.busCode ?? ''}`;
 
     useEffect(() => {
         if (!destinationPlaceId || destinationPlaceId.length === 0) {
@@ -67,15 +71,11 @@ const RouteResultsView = () => {
             .get<Route[]>(routesUrl, {params: {origin, destination}})
             .then((response) => {
                 const routes = response.data ?? [];
-                const merged = routes
-                    .map((r) => mergeLegs(r.legs))
-                    .filter((leg): leg is Leg => leg != null);
-
-                setOptions(merged);
+                setOptions(routes);
                 setActiveIndex(0);
                 setSelectedStop(null);
 
-                if (merged.length === 0) {
+                if (routes.length === 0) {
                     setState('empty');
                 } else {
                     setState('success');
@@ -90,16 +90,19 @@ const RouteResultsView = () => {
 
     useEffect(() => {
         setStopMarkers([]);
+        setBoardingStopCodesByStepKey({});
         setSelectedStop(null);
 
-        if (!activeLeg) return;
+        if (!activeRoute) return;
 
-        const transitSteps = activeLeg.steps.filter((s) => s.travelMode === 'transit' && !!s.busCode);
+        const steps = getRouteSteps(activeRoute);
+        const transitSteps = steps.filter((s) => s.travelMode === 'transit' && !!s.busCode);
         if (transitSteps.length === 0) return;
 
         const fetchStops = async () => {
             try {
                 const allSegments: BusRouteVO[][] = [];
+                const boardingMap: Record<string, string> = {};
                 for (const step of transitSteps) {
                     if (!step.departureStop || !step.arrivalStop || !step.busCode) continue;
                     const response = await axios.get<BusRouteVO[]>(busRoutesByStopNameUrl, {
@@ -109,8 +112,15 @@ const RouteResultsView = () => {
                             serviceNo: step.busCode,
                         },
                     });
-                    allSegments.push(response.data ?? []);
+                    const segment = response.data ?? [];
+                    allSegments.push(segment);
+                    const boardingCode = segment[0]?.busStopCode;
+                    if (boardingCode) {
+                        boardingMap[getStepKey(step)] = boardingCode;
+                    }
                 }
+
+                setBoardingStopCodesByStepKey(boardingMap);
 
                 const flattened = allSegments.flat();
                 const seen = new Set<string>();
@@ -134,12 +144,13 @@ const RouteResultsView = () => {
         };
 
         void fetchStops();
-    }, [activeLeg]);
+    }, [activeRoute]);
 
 
     const stepPolylines = useMemo(() => {
-        if (!activeLeg) return [];
-        return activeLeg.steps.map((step, index) => {
+        if (!activeRoute) return [];
+        const steps = getRouteSteps(activeRoute);
+        return steps.map((step, index) => {
             const coords = decodeStepPolyline(step);
             return {
                 key: `${index}-${step.travelMode}-${step.busCode ?? 'none'}`,
@@ -147,17 +158,18 @@ const RouteResultsView = () => {
                 travelMode: step.travelMode,
             };
         });
-    }, [activeLeg]);
+    }, [activeRoute]);
 
     const mapRegion = useMemo(() => {
-        if (!activeLeg) return null;
+        if (!activeRoute?.legs?.length) return null;
+        const firstLeg = activeRoute.legs[0];
         return {
-            latitude: activeLeg.startLocation.lat,
-            longitude: activeLeg.startLocation.lng,
+            latitude: firstLeg.startLocation.lat,
+            longitude: firstLeg.startLocation.lng,
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
         };
-    }, [activeLeg]);
+    }, [activeRoute]);
 
     const renderDots = (count: number, active: number) => (
         <View className={'flex-row items-center justify-center py-2'}>
@@ -173,13 +185,6 @@ const RouteResultsView = () => {
     const getFirstWalkLabel = (leg: Leg) => {
         const walk = leg.steps.find((s) => s.travelMode === 'walking');
         return walk?.distance?.text ?? '0 m';
-    };
-
-    const getFirstTransit = (leg: Leg) => leg.steps.find((s) => s.travelMode === 'transit');
-
-    const getArrivalLabel = (leg: Leg) => {
-        const transit = getFirstTransit(leg);
-        return transit?.arrivalStop || destinationDescription || 'Destination';
     };
 
     const getStopsLabel = (stopsCount: number | null | undefined) => {
@@ -246,20 +251,26 @@ const RouteResultsView = () => {
                             />
                         ))}
 
-                        {activeLeg && (
+                        {activeRoute?.legs?.length ? (
                             <>
                                 <Marker
-                                    coordinate={{latitude: activeLeg.startLocation.lat, longitude: activeLeg.startLocation.lng}}
+                                    coordinate={{
+                                        latitude: activeRoute.legs[0].startLocation.lat,
+                                        longitude: activeRoute.legs[0].startLocation.lng,
+                                    }}
                                     title={'Start'}
                                     pinColor={'#0f172a'}
                                 />
                                 <Marker
-                                    coordinate={{latitude: activeLeg.endLocation.lat, longitude: activeLeg.endLocation.lng}}
+                                    coordinate={{
+                                        latitude: activeRoute.legs[activeRoute.legs.length - 1].endLocation.lat,
+                                        longitude: activeRoute.legs[activeRoute.legs.length - 1].endLocation.lng,
+                                    }}
                                     title={'Destination'}
                                     pinColor={'#0f172a'}
                                 />
                             </>
-                        )}
+                        ) : null}
 
                         {stopMarkers
                             .filter((m) => Number.isFinite(m.latitude) && Number.isFinite(m.longitude) && (m.latitude !== 0 || m.longitude !== 0))
@@ -286,44 +297,55 @@ const RouteResultsView = () => {
                     initialPage={0}
                     onPageSelected={(e) => setActiveIndex(e.nativeEvent.position)}
                 >
-                {options.map((leg, index) => {
-                    const firstTransit = getFirstTransit(leg);
-                    const walkLabel = getFirstWalkLabel(leg);
-                    const stopsCount = firstTransit?.numStops;
-                    const busCode = firstTransit?.busCode;
-                    const arrivalLabel = getArrivalLabel(leg);
+                {options.map((routeOption, index) => {
+                    const steps = getRouteSteps(routeOption);
+                    const transitSteps = steps.filter((s) => s.travelMode === 'transit' && !!s.busCode);
+                    const durationSeconds = routeOption.totalDuration
+                        ?? routeOption.legs?.reduce((sum, l) => sum + (l?.duration?.value ?? 0), 0)
+                        ?? 0;
+                    const totalDurationLabel = formatDuration(durationSeconds).text;
                     const isRecommended = index === 0;
-                    const serviceFromStep = firstTransit?.serviceVO ?? null;
-                    const service: Service = serviceFromStep
-                        ? {
-                            ...serviceFromStep,
-                            nextBus: serviceFromStep.nextBus
-                                ? {...serviceFromStep.nextBus, destinationCode: serviceFromStep.nextBus.destinationCode ?? arrivalLabel}
-                                : null,
-                            nextBus2: serviceFromStep.nextBus2
-                                ? {...serviceFromStep.nextBus2, destinationCode: serviceFromStep.nextBus2.destinationCode ?? arrivalLabel}
-                                : null,
-                            nextBus3: serviceFromStep.nextBus3
-                                ? {...serviceFromStep.nextBus3, destinationCode: serviceFromStep.nextBus3.destinationCode ?? arrivalLabel}
-                                : null,
-                        }
-                        : {
-                            serviceNo: busCode ?? '--',
-                            operator: '',
-                            nextBus: null,
-                            nextBus2: null,
-                            nextBus3: null,
-                        };
-                    const busStopCode = selectedStop?.busStopCode ?? '--';
 
                     return (
                         <ScrollView key={index} className={'px-1 pb-4'}>
-                            <NearbyBusItem
-                                busStopCode={busStopCode}
-                                service={service}
-                                variant={isRecommended ? 'pinned' : 'default'}
-                                disableAutoRefresh
-                            />
+                            {transitSteps.map((transitStep, transitIndex) => {
+                                const arrivalLabel = transitStep.arrivalStop || destinationDescription || 'Destination';
+                                const serviceFromStep = transitStep.serviceVO ?? null;
+                                const service: Service = serviceFromStep
+                                    ? {
+                                        ...serviceFromStep,
+                                        serviceNo: serviceFromStep.serviceNo ?? transitStep.busCode ?? '--',
+                                        nextBus: serviceFromStep.nextBus
+                                            ? {...serviceFromStep.nextBus, destinationCode: serviceFromStep.nextBus.destinationCode ?? arrivalLabel}
+                                            : null,
+                                        nextBus2: serviceFromStep.nextBus2
+                                            ? {...serviceFromStep.nextBus2, destinationCode: serviceFromStep.nextBus2.destinationCode ?? arrivalLabel}
+                                            : null,
+                                        nextBus3: serviceFromStep.nextBus3
+                                            ? {...serviceFromStep.nextBus3, destinationCode: serviceFromStep.nextBus3.destinationCode ?? arrivalLabel}
+                                            : null,
+                                    }
+                                    : {
+                                        serviceNo: transitStep.busCode ?? '--',
+                                        operator: '',
+                                        nextBus: null,
+                                        nextBus2: null,
+                                        nextBus3: null,
+                                    };
+
+                                const stepKey = getStepKey(transitStep);
+                                const busStopCode = boardingStopCodesByStepKey[stepKey] ?? '--';
+
+                                return (
+                                    <NearbyBusItem
+                                        key={`${index}-${stepKey}-${transitIndex}`}
+                                        busStopCode={busStopCode}
+                                        service={service}
+                                        variant={isRecommended && transitIndex === 0 ? 'pinned' : 'default'}
+                                        disableAutoRefresh
+                                    />
+                                );
+                            })}
 
                             <View className={'mt-3 rounded-2xl border border-slate-200 bg-white px-4 py-3'}>
                                 <View className={'flex-row items-center justify-between'}>
@@ -333,16 +355,36 @@ const RouteResultsView = () => {
                                     )}
                                 </View>
 
-                                <View className={'mt-3 flex-row items-center'}>
-                                    <Text className={'text-sm font-semibold text-slate-800'}>🚶 {walkLabel}</Text>
-                                    <Text className={'mx-2 text-sm text-slate-400'}>→</Text>
-                                    <Text className={'text-sm font-semibold text-slate-800'}>
-                                        🚌 {busCode ?? '--'} {getStopsLabel(stopsCount)}
-                                    </Text>
+                                <View className={'mt-3'}>
+                                    {steps.map((step, stepIndex) => {
+                                        const isWalk = step.travelMode === 'walking';
+                                        const isTransit = step.travelMode === 'transit';
+                                        const headline = isWalk
+                                            ? `🚶 Walk ${step.distance?.text ?? '--'}`
+                                            : isTransit
+                                                ? `🚌 Bus ${step.busCode ?? '--'} ${getStopsLabel(step.numStops)}`
+                                                : `${step.travelMode}`;
+                                        const subtitle = isTransit
+                                            ? `${step.departureStop ?? '--'} → ${step.arrivalStop ?? '--'}`
+                                            : undefined;
+                                        return (
+                                            <View key={`${stepIndex}-${step.travelMode}-${step.busCode ?? 'none'}`} className={'py-1'}>
+                                                <Text className={'text-sm font-semibold text-slate-800'}>
+                                                    {headline}
+                                                    {step.duration?.text ? ` · ${step.duration.text}` : ''}
+                                                </Text>
+                                                {!!subtitle && (
+                                                    <Text className={'mt-0.5 text-xs text-slate-500'} numberOfLines={1}>
+                                                        {subtitle}
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        );
+                                    })}
                                 </View>
 
                                 <Text className={'mt-4 text-xs text-slate-500'} numberOfLines={1}>
-                                    Total time: {leg.duration?.text ?? '--'}
+                                    Total time: {totalDurationLabel ?? '--'}
                                 </Text>
                             </View>
                         </ScrollView>

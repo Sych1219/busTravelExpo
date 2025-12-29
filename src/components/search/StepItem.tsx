@@ -1,4 +1,4 @@
-import {Text, TouchableOpacity, View} from "react-native";
+import {Text, View} from "react-native";
 import {FontAwesome5, MaterialIcons} from "@expo/vector-icons";
 import {Step} from "@components/search/BusRoutes";
 

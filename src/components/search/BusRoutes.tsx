@@ -1,7 +1,4 @@
-import {View, Text, TouchableOpacity} from "react-native";
-import {useNavigation} from "@react-navigation/native";
-import {StackParamList} from "../../screens/SearchScreen";
-import {NativeStackNavigationProp} from "@react-navigation/native-stack";
+import {View} from "react-native";
 import type {Service} from "@components/shared/NearbyBusItem";
 
 interface BusRoutesProps {
@@ -181,8 +178,6 @@ const BusRoutes = ({destinationPlaceId}: BusRoutesProps) => {
     //     }
 
     // }, [location, destinationPlaceId]);
-    const navigation =
-        useNavigation<NativeStackNavigationProp<StackParamList, 'SearchView'>>();
     return (
         // legs == null || legs.length == 0 ?
         //     (<View>

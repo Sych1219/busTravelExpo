@@ -1,6 +1,5 @@
 import {FlatList, Text, TouchableOpacity, View} from "react-native";
 import {BusRouteVO, BusServiceNoAndBusRouteVOs} from "@components/search/ListWalkAndStopsView";
-import {NextBus} from "@components/shared/NearbyBusItem";
 import {formatCountdown} from "@utils/UtilsMethod";
 import React from "react";
 

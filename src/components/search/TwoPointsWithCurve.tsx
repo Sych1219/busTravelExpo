@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {View, Dimensions, Animated, Easing, Image, Text as TextRN} from 'react-native';
-import Svg, {Path, Circle, Text, Line, G} from 'react-native-svg';
+import {Animated, Dimensions, Image, Text as TextRN, View} from 'react-native';
+import Svg, {Circle, G, Line, Text} from 'react-native-svg';
 import {BusRouteVO, BusServiceNoAndBusRouteVOs} from "@components/search/ListWalkAndStopsView";
 import axios, {AxiosRequestConfig} from "axios";
 import {busServiceUrl} from "@utils/UrlsUtil";
 import {BusServiceParams, Service} from "@components/shared/NearbyBusItem";
-import {formatCountdown, truncateString} from "@utils/UtilsMethod";
+import {formatCountdown} from "@utils/UtilsMethod";
 
 export interface BusSVGInfo {
     //start point

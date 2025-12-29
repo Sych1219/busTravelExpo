@@ -1,14 +1,7 @@
 import {View, Text, TouchableOpacity} from "react-native";
-import {useLocation} from "@utils/CustomerHook";
-import {useEffect, useState} from "react";
-import axios from "axios";
-import {routesUrl} from "@utils/UrlsUtil";
-import Divider from "@components/search/Divider";
-import StepItem from "@components/search/StepItem";
 import {useNavigation} from "@react-navigation/native";
 import {StackParamList} from "../../screens/SearchScreen";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
-import {mergeLegs} from "@components/search/routeUtils";
 import type {Service} from "@components/shared/NearbyBusItem";
 
 interface BusRoutesProps {

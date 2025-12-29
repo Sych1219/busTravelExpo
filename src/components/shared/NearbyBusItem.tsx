@@ -99,20 +99,6 @@ const NearbyBusItem = ({
         return extras.join(', ');
     };
 
-    const tagLine = () => {
-        const tags = [];
-        if (isWheelChairAccessible) {
-            tags.push('Accessible');
-        }
-        if (nextBus?.type === 'DD') {
-            tags.push('DD');
-        }
-        if (tags.length === 0) {
-            return 'Tags: None';
-        }
-        return `Tags: ${tags.join(', ')}`;
-    };
-
     const updateBusService = (busStopCode: string, busCode: string) => {
         console.log("updateBusService", busStopCode, busCode)
         setIsRefreshing(true);
@@ -197,7 +183,6 @@ const NearbyBusItem = ({
                         </View>
                     </View>
 
-                    <Text className="mt-2 text-xs text-slate-500">{tagLine()}</Text>
                     <Text className="mt-1 text-xs text-slate-500">
                         Next: {getNextLine()}
                     </Text>

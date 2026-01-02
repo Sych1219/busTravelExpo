@@ -79,10 +79,6 @@ const NearbyBusItem = ({
         return 'bg-slate-200 text-slate-700';
     };
 
-    const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', {hour12: false});
-    };
-
     const getNextLine = () => {
         const extras = [nextBus2, nextBus3]
             .map((bus) => formatEta(bus?.countDown ?? null))
@@ -106,9 +102,8 @@ const NearbyBusItem = ({
                 },
             });
         } catch (error) {
-            console.log('Failed to save favourite', error);
-        } finally {
             setIsSavingFavourite(false);
+            console.log('Failed to save favourite', error);
         }
     };
 

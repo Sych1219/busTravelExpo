@@ -8,6 +8,7 @@ import ScrollWithBusItems from "@components/nearby/ScrollWithBusItems";
 import {busArrivingInfoUrl} from "@utils/UrlsUtil";
 import * as Location from 'expo-location';
 import {useNavigation} from "@react-navigation/native";
+import CenteredMessage from "@components/shared/CenteredMessage";
 
 
 // Define your initial state for the tab index and routes
@@ -137,11 +138,7 @@ const NearbyTabView = () => {
                             const routeIndex = Number(route.key);
                             const busStopWithBusesInfo = busStops[routeIndex];
                             if (!busStopWithBusesInfo) {
-                                return (
-                                    <View className="flex-1 items-center justify-center">
-                                        <Text className="text-base text-slate-500">Loading...</Text>
-                                    </View>
-                                );
+                                return <CenteredMessage/>;
                             }
                             return (
                                 <ScrollWithBusItems
@@ -158,9 +155,7 @@ const NearbyTabView = () => {
                 </View>
             </View>
             : (
-                <View className="flex-1 items-center justify-center">
-                    <Text className="text-base text-slate-500">Loading...</Text>
-                </View>
+                <CenteredMessage/>
             )
 
 

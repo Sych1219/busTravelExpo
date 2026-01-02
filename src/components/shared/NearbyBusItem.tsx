@@ -1,9 +1,5 @@
-import {Image, Modal, Pressable, Text, TouchableOpacity, View} from "react-native";
+import {Image, Modal, Text, TouchableOpacity, View} from "react-native";
 import {useState} from "react";
-import axios, {AxiosRequestConfig} from "axios";
-import {busServiceUrl, clickOnFavouriteBus} from "@utils/UrlsUtil";
-import Constants from "expo-constants";
-import {useLocation} from "@utils/CustomerHook";
 import {MaterialIcons} from "@expo/vector-icons";
 
 
@@ -45,20 +41,13 @@ const NearbyBusItem = ({
                            busStopCode, service, variant = 'default', disableAutoRefresh = false
                        }: NearbyBusItemProps) => {
 
-    let deviceId: number = Constants.deviceId;
-    if (!deviceId) {
-        deviceId = 666;
-    }
-
     const [serviceInside, setServiceInside] = useState<Service>(service);
     const nextBus = serviceInside.nextBus;
     const nextBus2 = serviceInside.nextBus2 ?? null;
     const nextBus3 = serviceInside.nextBus3 ?? null;
     const serviceNo = serviceInside.serviceNo;
     const isWheelChairAccessible = nextBus?.feature === 'WAB'
-    const location = useLocation().location;
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(new Date());
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -100,46 +89,6 @@ const NearbyBusItem = ({
         return extras.join(', ');
     };
 
-    const updateBusService = (busStopCode: string, busCode: string) => {
-        console.log("updateBusService", busStopCode, busCode)
-        setIsRefreshing(true);
-        const params: BusServiceParams = {
-            busStopCode: busStopCode,
-            busCode: busCode,
-        }
-        const busServiceUrlParameter: AxiosRequestConfig = {
-            params: params,
-        };
-        const parmas2 = {
-            deviceId: deviceId,
-            busStopCode,
-            busCode,
-            longitude: location?.longitude ?? 0,
-            latitude: location?.latitude ?? 0,
-        }
-        console.log("parmas2", parmas2)
-        //here also need to call the be for faviourite bus
-        axios.get(clickOnFavouriteBus, {params:parmas2}).then((response) => {
-            console.log("click for faviourite", response.data)
-        }).catch((error) => {
-            console.log("click for faviourite got error", error)
-        });
-
-
-        axios.get<Service>(busServiceUrl, busServiceUrlParameter).then((response) => {
-            setServiceInside(response.data);
-            setIsRefreshing(false);
-            setLastUpdated(new Date());
-        }).catch((error) => {
-            console.log("updateBusService", error)
-            setIsRefreshing(false);
-            throw new Error('Failed to fetch data');
-        });
-
-
-    }
-
-
     return (
         <View className="mb-3">
             <View
@@ -147,15 +96,7 @@ const NearbyBusItem = ({
                     variant === 'pinned' ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-white'
                 }`}
             >
-                <Pressable
-                    onPress={() => {
-                        if (!isExpanded && !disableAutoRefresh) {
-                            updateBusService(busStopCode, serviceNo);
-                        }
-                        setIsExpanded((prev) => !prev);
-                    }}
-                    className="px-4 py-3"
-                >
+                <View className="px-4 py-3">
                     <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center space-x-3">
                             <Text className="text-2xl font-extrabold text-slate-900">{serviceNo}</Text>
@@ -208,19 +149,7 @@ const NearbyBusItem = ({
                             <MaterialIcons name="favorite-border" size={18} color="#92400e" />
                         </TouchableOpacity>
                     </View>
-                </Pressable>
-
-                {isExpanded && (
-                    <View className="border-t border-slate-200 px-4 pb-4 pt-3">
-                        <Text className="text-xs text-slate-500">Next buses: {getNextLine()}</Text>
-                        <Text className="mt-1 text-xs text-slate-400">
-                            Last updated: {formatTime(lastUpdated)}
-                        </Text>
-                        <Text className="mt-2 text-xs text-slate-400">
-                            Tap Details for the full stop list and service notes.
-                        </Text>
-                    </View>
-                )}
+                </View>
             </View>
 
             <Modal visible={isDetailsOpen} transparent animationType="slide">

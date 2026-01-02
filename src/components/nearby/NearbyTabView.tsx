@@ -2,7 +2,7 @@ import {ActionSheetIOS, Alert, Dimensions, Platform, Text, TouchableOpacity, Vie
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useEffect, useState} from "react";
 import {Route, TabView} from "react-native-tab-view";
-import {BusStopWithBusesInfoProps, RouteProps} from "../../screens/NearbyScreen";
+import {BusStopWithBusesInfoProps} from "../../screens/NearbyScreen";
 import axios from "axios";
 import ScrollWithBusItems from "@components/nearby/ScrollWithBusItems";
 import {busArrivingInfoUrl} from "@utils/UrlsUtil";

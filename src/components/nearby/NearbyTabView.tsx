@@ -1,4 +1,4 @@
-import {Dimensions, Text, TouchableOpacity, View} from "react-native";
+import {ActionSheetIOS, Alert, Dimensions, Platform, Text, TouchableOpacity, View} from "react-native";
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import React, {useEffect, useState} from "react";
 import {Route, TabView} from "react-native-tab-view";
@@ -66,6 +66,36 @@ const NearbyTabView = () => {
     }, []);
 
     const currentStop = busStops[index];
+
+    const showStopPicker = () => {
+        if (!routes.length) {
+            return;
+        }
+        const titles = routes.map((route) => route.title ?? 'Stop');
+
+        if (Platform.OS === 'ios') {
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    title: 'Select stop',
+                    options: [...titles, 'Cancel'],
+                    cancelButtonIndex: titles.length,
+                },
+                (buttonIndex) => {
+                    if (buttonIndex < titles.length) {
+                        setIndex(buttonIndex);
+                    }
+                }
+            );
+        } else {
+            Alert.alert('Select stop', undefined, [
+                ...titles.map((title, idx) => ({
+                    text: title ?? 'Stop',
+                    onPress: () => setIndex(idx),
+                })),
+                {text: 'Cancel', style: 'cancel'},
+            ]);
+        }
+    };
     const formatTime = (date: Date | null) => {
         if (!date) return '--:--';
         return date.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'});
@@ -86,7 +116,6 @@ const NearbyTabView = () => {
                             </Text>
                         </View>
                         <View className="flex-row items-center space-x-2">
-                            {/* TODO: this will not navigate to search screen */}
                             <TouchableOpacity
                                 className="rounded-full bg-white px-3 py-2"
                                 onPress={() => navigation.navigate('SearchScreen')}
@@ -115,10 +144,9 @@ const NearbyTabView = () => {
                                     {currentStop?.busStopCode ? ` · Stop Code ${currentStop.busStopCode}` : ''}
                                 </Text>
                             </View>
-                             {/* TODO: this will not navigate to search screen */}
                             <TouchableOpacity
                                 className="rounded-full bg-slate-900 px-3 py-2"
-                                onPress={() => navigation.navigate('SearchScreen')}
+                                onPress={showStopPicker}
                             >
                                 <Text className="text-xs font-semibold text-white">Change Stop</Text>
                             </TouchableOpacity>

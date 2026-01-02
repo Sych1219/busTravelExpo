@@ -23,7 +23,6 @@ const NearbyTabView = () => {
     const [filterMode, setFilterMode] = useState<FilterMode>('all');
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
-    const dockContentPadding = 24 + insets.bottom;
 
     const getCurrentLocation = async () => {
         try {
@@ -143,7 +142,6 @@ const NearbyTabView = () => {
                             return (
                                 <ScrollWithBusItems
                                     busStopWithBusesInfo={busStopWithBusesInfo}
-                                    contentPaddingBottom={dockContentPadding}
                                     filterMode={filterMode}
                                 />
                             );

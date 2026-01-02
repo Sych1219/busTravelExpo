@@ -38,23 +38,20 @@ const NearbyTabView = () => {
             let longitude = 103.9004605
             console.log("current location", latitude, longitude);
             console.log("getting current location");
-            axios.get(busArrivingInfoUrl, {
+            axios.get<BusStopWithBusesInfoProps[]>(busArrivingInfoUrl, {
                 params: {
                     longitude: longitude,
                     latitude: latitude,
                     stopCount: 3,
                 },
-            }).then((response) => {
+            }).then(({ data: busStops }) => {
                 //passing the response.data to the busStop obj
-                const busStopsTemp = JSON.parse(JSON.stringify(response.data)) as BusStopWithBusesInfoProps[];
-                setBusStops(busStopsTemp);
+                setBusStops(busStops);
                 setLastUpdated(new Date());
-
-                const routesInitial: RouteProps[] = busStopsTemp.map((busStop, index) => ({
+                setRoutes(busStops.map((busStop, index) => ({
                     key: index.toString(),
                     title: busStop.busStopDescription
-                }));
-                setRoutes(routesInitial);
+                })));
             });
 
             return {latitude, longitude};

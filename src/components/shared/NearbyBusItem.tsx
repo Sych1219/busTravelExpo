@@ -1,6 +1,9 @@
 import {Image, Modal, Text, TouchableOpacity, View} from "react-native";
 import {useState} from "react";
+import axios from "axios";
+import Constants from "expo-constants";
 import {MaterialIcons} from "@expo/vector-icons";
+import {clickOnAddToFavoritesButtonUrl} from "@utils/UrlsUtil";
 
 
 export interface Service {
@@ -50,6 +53,7 @@ const NearbyBusItem = ({
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(new Date());
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isSavingFavourite, setIsSavingFavourite] = useState(false);
 
     const formatEta = (countDown: number | null) => {
         if (countDown === null || countDown === undefined) {
@@ -87,6 +91,25 @@ const NearbyBusItem = ({
             return 'No additional arrivals yet';
         }
         return extras.join(', ');
+    };
+
+    const handleAddToFavourites = async () => {
+        const deviceId = Constants.deviceId ?? 666;
+        console.log("deviceId, busStopCode, serviceNo", deviceId, busStopCode, serviceNo);
+        try {
+            setIsSavingFavourite(true);
+            await axios.post(clickOnAddToFavoritesButtonUrl, null, {
+                params: {
+                    deviceId,
+                    busStopCode,
+                    serviceNo,
+                },
+            });
+        } catch (error) {
+            console.log('Failed to save favourite', error);
+        } finally {
+            setIsSavingFavourite(false);
+        }
     };
 
     return (
@@ -145,6 +168,8 @@ const NearbyBusItem = ({
                         <TouchableOpacity
                             className="flex-1 items-center rounded-full bg-amber-100 px-3 py-2"
                             accessibilityLabel="Save to favourites"
+                            onPress={handleAddToFavourites}
+                            disabled={isSavingFavourite}
                         >
                             <MaterialIcons name="favorite-border" size={18} color="#92400e" />
                         </TouchableOpacity>

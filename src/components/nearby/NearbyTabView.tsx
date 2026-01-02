@@ -68,10 +68,6 @@ const NearbyTabView = () => {
         getCurrentLocation()
     }, []);
 
-    const handleIndexChange = (index: number) => {
-        setIndex(index);
-    };
-
     const currentStop = busStops[index];
     const formatTime = (date: Date | null) => {
         if (!date) return '--:--';
@@ -84,7 +80,7 @@ const NearbyTabView = () => {
                 <View className="absolute -top-24 -right-12 w-64 h-64 rounded-full bg-amber-100 opacity-70"/>
                 <View className="absolute top-24 -left-16 w-56 h-56 rounded-full bg-emerald-100 opacity-50"/>
 
-                <View className="px-4" style={{paddingTop: insets.top + 8}}>
+                <View className="px-4" style={{paddingTop: insets.top}}>
                     <View className="flex-row items-center justify-between">
                         <View>
                             <Text className="text-3xl font-extrabold text-slate-900">Nearby</Text>
@@ -93,6 +89,7 @@ const NearbyTabView = () => {
                             </Text>
                         </View>
                         <View className="flex-row items-center space-x-2">
+                            {/* TODO: this will not navigate to search screen */}
                             <TouchableOpacity
                                 className="rounded-full bg-white px-3 py-2"
                                 onPress={() => navigation.navigate('SearchScreen')}
@@ -107,12 +104,6 @@ const NearbyTabView = () => {
                                     Filter: {filterMode === 'all' ? 'All' : 'Double Deck'}
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                className="rounded-full bg-slate-900 px-3 py-2"
-                                onPress={getCurrentLocation}
-                            >
-                                <Text className="text-xs font-semibold text-white">Refresh</Text>
-                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -123,9 +114,11 @@ const NearbyTabView = () => {
                                     {currentStop?.busStopDescription ?? 'Nearby stops'}
                                 </Text>
                                 <Text className="mt-1 text-xs text-slate-500">
-                                    {currentStop?.busStopRoadName ?? 'Road'} · Stop Code {currentStop?.busStopCode ?? '--'}
+                                    {currentStop?.busStopRoadName ?? 'Road'}
+                                    {currentStop?.busStopCode ? ` · Stop Code ${currentStop.busStopCode}` : ''}
                                 </Text>
                             </View>
+                             {/* TODO: this will not navigate to search screen */}
                             <TouchableOpacity
                                 className="rounded-full bg-slate-900 px-3 py-2"
                                 onPress={() => navigation.navigate('SearchScreen')}
@@ -133,7 +126,7 @@ const NearbyTabView = () => {
                                 <Text className="text-xs font-semibold text-white">Change Stop</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text className="mt-2 text-xs text-slate-400">Swipe left or right to switch stops</Text>
+                        <Text className="mt-2 text-[9px] text-slate-400">Swipe left or right to switch stops</Text>
                     </View>
                 </View>
 
@@ -158,7 +151,7 @@ const NearbyTabView = () => {
                                 />
                             );
                         }}
-                        onIndexChange={handleIndexChange}
+                        onIndexChange={setIndex}
                         initialLayout={initialLayout}
                         renderTabBar={() => null}
                     />
